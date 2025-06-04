@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/crisis_survivor.iml" filepath="$PROJECT_DIR$/crisis_survivor.iml" />
+      <module fileurl="file://$PROJECT_DIR$/android/crisis_survivor_android.iml" filepath="$PROJECT_DIR$/android/crisis_survivor_android.iml" />
+    </modules>
+  </component>
+</project>
