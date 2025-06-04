@@ -160,6 +160,6 @@ cython_debug/
 #.idea/
 .vercel
 
-crisis-survivor-firebase-adminsdk-fbsvc-c58f35a6ed.json
+./crisis-survivor-firebase-adminsdk-fbsvc-c58f35a6ed.json
 android/app/release.keystore
 android\key.properties
