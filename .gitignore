@@ -159,3 +159,7 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 .vercel
+
+crisis-survivor-firebase-adminsdk-fbsvc-c58f35a6ed.json
+android/app/release.keystore
+android\key.properties

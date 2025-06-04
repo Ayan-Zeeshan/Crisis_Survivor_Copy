@@ -1,9 +1,9 @@
-import { getCodeForEmail, invalidateCodeForEmail } from './check-email';
+import { getCodeForEmail, invalidateCodeForEmail } from './send-code.js'; // Fix: use correct filename + .js
 
 export default async function (req, res) {
     if (req.method !== 'POST') return res.status(405).end();
 
-    const { email, code } = req.body;
+    const { email, code } = req.body || {}; // Fix: handle undefined req.body
     if (!email || !code) return res.status(400).json({ error: "Missing email or code" });
 
     const storedCode = getCodeForEmail(email);

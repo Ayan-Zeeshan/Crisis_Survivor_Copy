@@ -27,7 +27,7 @@ const transporter = nodemailer.createTransport({
 });
 
 export default async function handler(req, res) {
-    const { email } = req.body;
+    const { email } = req.body || {}; // Fix: handle undefined req.body
     if (!email) return res.status(400).json({ error: "Missing email" });
 
     try {
