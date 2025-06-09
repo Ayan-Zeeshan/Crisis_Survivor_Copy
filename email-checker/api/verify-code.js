@@ -1,16 +1,28 @@
-import { getCodeForEmail, invalidateCodeForEmail } from './send-code.js'; // Fix: use correct filename + .js
+import { getCodeForEmail, invalidateCodeForEmail } from './send-code.js';
 
-export default async function (req, res) {
+export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).end();
 
-    const { email, code } = req.body || {}; // Fix: handle undefined req.body
-    if (!email || !code) return res.status(400).json({ error: "Missing email or code" });
+    const { email, code } = req.body || {};
+    if (!email || !code) {
+        return res.status(400).json({ error: "Missing email or code" });
+    }
 
-    const storedCode = getCodeForEmail(email);
-    if (!storedCode) return res.status(400).json({ error: "Code expired or not found" });
+    try {
+        const storedCode = getCodeForEmail(email);
+        if (!storedCode) {
+            return res.status(400).json({ error: "Code expired or not found" });
+        }
 
-    if (storedCode !== code) return res.status(400).json({ error: "Invalid code" });
+        if (storedCode !== code) {
+            return res.status(400).json({ error: "Invalid code" });
+        }
 
-    invalidateCodeForEmail(email); // one-time use
-    return res.status(200).json({ verified: true });
+        // Invalidate the code after successful match
+        invalidateCodeForEmail(email);
+        return res.status(200).json({ verified: true });
+
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
 }

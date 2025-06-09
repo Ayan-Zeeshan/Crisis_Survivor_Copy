@@ -31,6 +31,7 @@ export default async function handler(req, res) {
     if (!email) return res.status(400).json({ error: "Missing email" });
 
     try {
+        exists
         const user = await getAuth().getUserByEmail(email);
 
         const code = generateCode();
