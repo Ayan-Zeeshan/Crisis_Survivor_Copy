@@ -138,7 +138,7 @@ def delete_user(request):
 
         # 🔍 Search Firestore for requester doc by email
         users_ref = db.collection('users')
-        query = users_ref.where(filter=('email', '==', requester_email)).limit(1).stream()
+        query = users_ref.where('email', '==', requester_email).limit(1).stream()
         requester_doc = next(query, None)
 
         if not requester_doc:
@@ -161,8 +161,8 @@ def delete_user(request):
         # ✅ Deletion logic — move this **outside** the `if role != 'admin'` block
         firebase_auth.delete_user(target_uid)
 
-        # ✅ Delete Firestore doc(s)
-        target_query = users_ref.where(filter=('email', '==', target_email)).stream()
+        # 🔍 Delete target Firestore doc by email
+        target_query = users_ref.where('email', '==', target_email).stream()
         for doc in target_query:
             doc.reference.delete()
 
