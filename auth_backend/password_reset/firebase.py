@@ -4,9 +4,6 @@ from firebase_admin import auth, credentials
 from dotenv import load_dotenv
 from firebase_admin import firestore
 
-db = firestore.client()
-
-
 load_dotenv()  # in case you're loading from .env
 
 if not firebase_admin._apps:
@@ -23,3 +20,6 @@ if not firebase_admin._apps:
         "client_x509_cert_url": os.getenv("FIREBASE_CLIENT_CERT_URL")
     })
     firebase_admin.initialize_app(cred)
+    
+# ✅ Export Firestore client
+db = firestore.client()

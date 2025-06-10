@@ -3,7 +3,6 @@ from django.core.mail import send_mail
 from django.http import JsonResponse
 from .firebase import*
 from .firebase import auth as firebase_auth  # ✅ Use initialized firebase from firebase.py
-print("Firebase initialized:", firebase_admin._apps)
 from .redis_client import redis  # ✅ Use shared redis instance
 from django.views.decorators.csrf import csrf_exempt
 import os
