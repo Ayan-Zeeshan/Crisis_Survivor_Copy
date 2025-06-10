@@ -9,27 +9,39 @@ import os
 import json
 
 @csrf_exempt
-def check_email_exists(request):
+def check_email_exists(request, provider=None):
     if request.method != 'POST':
         return JsonResponse({'error': 'Invalid method'}, status=405)
 
     try:
         data = json.loads(request.body)
         email = data.get('email')
+        provider = data.get('provider')  # ✅ Optionally passed
 
         if not email:
             return JsonResponse({'error': 'Email required'}, status=400)
 
         try:
-            firebase_auth.get_user_by_email(email)
+            user = firebase_auth.get_user_by_email(email)
             exists = True
         except firebase_auth.UserNotFoundError:
-            exists = False
+            return JsonResponse({'exists': False})
 
-        return JsonResponse({'exists': exists})
+        # ✅ If provider filter is given, check it
+        if provider:
+            sign_in_methods = user.provider_data
+            method_ids = [p.provider_id for p in sign_in_methods]
+            if provider not in method_ids:
+                return JsonResponse({'exists': False})
+            return JsonResponse({'exists': True, 'provider': provider})
+        else:
+            # No provider filter, return general existence
+            all_providers = [p.provider_id for p in user.provider_data]
+            return JsonResponse({'exists': True, 'provider': all_providers[0] if all_providers else None})
 
     except Exception as e:
-        return JsonResponse({'error': 'Server error'}, status=500)
+        return JsonResponse({'error': 'Server error', 'details': str(e)}, status=500)
+
 
 def generate_code(length=8):
     return ''.join(random.choices(string.ascii_letters + string.digits, k=length))

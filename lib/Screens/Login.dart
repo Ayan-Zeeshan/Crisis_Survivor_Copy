@@ -14,6 +14,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Login extends StatefulWidget {
@@ -30,6 +31,77 @@ class _LoginState extends State<Login> {
   bool isButtonClicked = false;
   // bool user = true;
   User? user;
+  // bool emailExists = false;
+  // String? error;
+
+  // Future checkEmail(String email) async {
+  //   setState(() => error = null);
+  //   try {
+  //     // Check if the email exists
+  //     final checkResponse = await http.post(
+  //       Uri.parse(
+  //         "https://authbackend-production-ed7f.up.railway.app/api/check-email/",
+  //       ),
+  //       headers: {'Content-Type': 'application/json'},
+  //       body: jsonEncode({'email': email}),
+  //     );
+
+  //     final checkJson = jsonDecode(checkResponse.body);
+  //     if (checkResponse.statusCode != 200 || checkJson['exists'] != true) {
+  //       setState(() => error = "No account found for this email.");
+  //       return;
+  //     } else {
+  //       setState(() {
+  //         emailExists = true;
+  //       });
+  //     }
+  //   } catch (e) {
+  //     setState(() => error = "Network error. Try again.");
+  //   }
+  // }
+  bool emailExists = false;
+  String? error;
+
+  Future checkEmail(String email, {String? provider}) async {
+    setState(() => error = null);
+    try {
+      final checkResponse = await http.post(
+        Uri.parse(
+          "https://authbackend-production-ed7f.up.railway.app/api/check-email/",
+        ),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': email,
+          if (provider != null) 'provider': provider,
+        }),
+      );
+
+      final checkJson = jsonDecode(checkResponse.body);
+
+      if (checkResponse.statusCode != 200 || checkJson['exists'] != true) {
+        setState(() => error = "No account found for this email.");
+        return;
+      } else {
+        setState(() {
+          emailExists = true;
+        });
+
+        if (checkJson['provider'] == 'google.com') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Please sign in using Google'),
+              duration: Duration(seconds: 3),
+            ),
+          );
+          await signInWithGoogle();
+          return;
+        }
+      }
+    } catch (e) {
+      setState(() => error = "Network error. Try again.");
+    }
+  }
+
   Future<void> signOut() async {
     await GoogleSignIn().signOut();
     await FirebaseAuth.instance.signOut();

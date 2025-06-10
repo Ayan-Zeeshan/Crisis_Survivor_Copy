@@ -12,6 +12,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Sign_Up extends StatefulWidget {
@@ -39,6 +40,34 @@ class _Sign_UpState extends State<Sign_Up> {
   Color color3 = Color.fromARGB(204, 0, 0, 0);
   Color color4 = Color.fromARGB(204, 0, 0, 0);
   User? user;
+  bool emailExists = false;
+  String? error;
+
+  Future checkEmail(String email) async {
+    setState(() => error = null);
+    try {
+      // Check if the email exists
+      final checkResponse = await http.post(
+        Uri.parse(
+          "https://authbackend-production-ed7f.up.railway.app/api/check-email/",
+        ),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
+      );
+
+      final checkJson = jsonDecode(checkResponse.body);
+      if (checkResponse.statusCode != 200 || checkJson['exists'] != true) {
+        setState(() => error = "No account found for this email.");
+        return;
+      } else {
+        setState(() {
+          emailExists = true;
+        });
+      }
+    } catch (e) {
+      setState(() => error = "Network error. Try again.");
+    }
+  }
 
   Future<void> signOut() async {
     await GoogleSignIn().signOut();
@@ -53,11 +82,9 @@ class _Sign_UpState extends State<Sign_Up> {
     String email,
   ) async {
     try {
-      final methods = await FirebaseAuth.instance.fetchSignInMethodsForEmail(
-        email,
-      );
+      await checkEmail(email);
 
-      if (methods.isNotEmpty) {
+      if (emailExists) {
         // An account with this email exists, redirect to Login()
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
