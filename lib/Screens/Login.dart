@@ -59,10 +59,10 @@ class _LoginState extends State<Login> {
   //     setState(() => error = "Network error. Try again.");
   //   }
   // }
-  bool emailExists = false;
+  bool emailExistsOnGoogle = false;
   String? error;
 
-  Future checkEmail(String email, {String? provider}) async {
+  Future checkEmail(String email, [String? provider]) async {
     setState(() => error = null);
     try {
       final checkResponse = await http.post(
@@ -82,17 +82,16 @@ class _LoginState extends State<Login> {
         setState(() => error = "No account found for this email.");
         return;
       } else {
-        setState(() {
-          emailExists = true;
-        });
-
-        if (checkJson['provider'] == 'google.com') {
+        if (checkJson['provider'] == provider) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Please sign in using Google'),
               duration: Duration(seconds: 3),
             ),
           );
+          setState(() {
+            emailExistsOnGoogle = true;
+          });
           await signInWithGoogle();
           return;
         }
@@ -203,10 +202,10 @@ class _LoginState extends State<Login> {
     }
 
     try {
-      List<String> signInMethods = await FirebaseAuth.instance
-          .fetchSignInMethodsForEmail(_myController.text);
-
-      if (signInMethods.contains('google.com')) {
+      // List<String> signInMethods = await FirebaseAuth.instance
+      //     .fetchSignInMethodsForEmail(_myController.text);
+      await checkEmail(_myController.text, 'google.com');
+      if (emailExistsOnGoogle) {
         // If user signed up with Google, prompt Google Sign-In instead
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
