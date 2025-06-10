@@ -232,7 +232,9 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
     try {
       // Check if the email exists
       final checkResponse = await http.post(
-        Uri.parse("https://10.0.2.2/api/check-email/"),
+        Uri.parse(
+          "https://authbackend-production-ed7f.up.railway.app/api/check-email/",
+        ),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email}),
       );
@@ -241,24 +243,26 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
       if (checkResponse.statusCode != 200 || checkJson['exists'] != true) {
         setState(() => error = "No account found for this email.");
         return;
-      }
-
-      // Send the reset code
-      final resetResponse = await http.post(
-        Uri.parse("https://10.0.2.2/api/send-code/"),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email}),
-      );
-
-      final resetJson = jsonDecode(resetResponse.body);
-      if (resetResponse.statusCode == 200 && resetJson['success'] == true) {
-        setState(() {
-          emailSent = true;
-          error = null;
-          _startResendTimer();
-        });
       } else {
-        setState(() => error = resetJson['error'] ?? "Failed to send code.");
+        // Send the reset code
+        final resetResponse = await http.post(
+          Uri.parse(
+            "https://authbackend-production-ed7f.up.railway.app/api/send-code/",
+          ),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({'email': email}),
+        );
+
+        final resetJson = jsonDecode(resetResponse.body);
+        if (resetResponse.statusCode == 200 && resetJson['success'] == true) {
+          setState(() {
+            emailSent = true;
+            error = null;
+            _startResendTimer();
+          });
+        } else {
+          setState(() => error = resetJson['error'] ?? "Failed to send code.");
+        }
       }
     } catch (e) {
       setState(() => error = "Network error. Try again.");
@@ -272,7 +276,9 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
 
     try {
       final response = await http.post(
-        Uri.parse("https://10.0.2.2/api/verify-code/"),
+        Uri.parse(
+          "https://authbackend-production-ed7f.up.railway.app/api/verify-code/",
+        ),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'code': code}),
       );

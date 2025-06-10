@@ -117,3 +117,52 @@ def verify_code(request):
         'message': 'Verification successful.',
         'token': custom_token.decode('utf-8')
     })
+
+@csrf_exempt
+def delete_user(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Invalid method'}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        requester_email = data.get('requester_email')  # the one initiating delete
+        target_uid = data.get('uid')
+        target_email = data.get('email')
+
+        if not requester_email:
+            return JsonResponse({'error': 'Requester email required'}, status=400)
+        if not target_uid and not target_email:
+            return JsonResponse({'error': 'Provide either uid or email of user to delete'}, status=400)
+
+        # Import Firestore client
+        from .firebase import db
+
+        # 🔍 Search Firestore for requester doc by email
+        users_ref = db.collection('users')
+        query = users_ref.where('email', '==', requester_email).limit(1).stream()
+        requester_doc = next(query, None)
+
+        if not requester_doc:
+            return JsonResponse({'error': 'Requester not found in Firestore'}, status=404)
+
+        role = requester_doc.to_dict().get('role', '').lower()
+
+        # Get UID by email if not already provided
+        if target_email and not target_uid:
+            try:
+                target_user = firebase_auth.get_user_by_email(target_email)
+                target_uid = target_user.uid
+            except firebase_auth.UserNotFoundError:
+                return JsonResponse({'error': 'Target user not found by email'}, status=404)
+
+        if role != 'admin':
+            if requester_email != target_email:
+                return JsonResponse({'error': 'Permission denied: only admins can delete others'}, status=403)
+
+        # 🧨 Delete user from Firebase Auth
+        firebase_auth.delete_user(target_uid)
+
+        return JsonResponse({'success': True, 'message': f'User {target_uid} deleted'})
+
+    except Exception as e:
+        return JsonResponse({'error': 'Server error', 'details': str(e)}, status=500)

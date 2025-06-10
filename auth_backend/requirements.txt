@@ -50,9 +50,3 @@ tzdata==2025.2
 upstash-redis==1.4.0
 uritemplate==4.2.0
 urllib3==2.4.0
-
-fly secrets set UPSTASH_REDIS_REST_URL="your-url"
-fly secrets set UPSTASH_PASSWORD="your-pass"
-fly secrets set UPSTASH_TOKEN="your-token"
-
-fly secrets set EMAIL_HOST_PASSWORD="your-gmail-app-password"
