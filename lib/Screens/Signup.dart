@@ -1,4 +1,4 @@
-// ignore_for_file: camel_case_types, unused_local_variable, avoid_print, prefer_typing_uninitialized_variables, unnecessary_set_literal, no_leading_underscores_for_local_identifiers, unused_element, use_build_context_synchronously, file_names, sized_box_for_whitespace, deprecated_member_use, await_only_futures
+// ignore_for_file: camel_case_types, unused_local_variable, avoid_print, prefer_typing_uninitialized_variables, unnecessary_set_literal, no_leading_underscores_for_local_identifiers, unused_element, use_build_context_synchronously, file_names, sized_box_for_whitespace, deprecated_member_use, await_only_futures, strict_top_level_inference
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
