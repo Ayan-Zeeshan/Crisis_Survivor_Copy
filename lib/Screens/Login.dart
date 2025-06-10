@@ -6,7 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crisis_survivor/Consultant/consultantscreen.dart';
 import 'package:crisis_survivor/Donee/doneecreen.dart';
 import 'package:crisis_survivor/Donor/donorscreen.dart';
-//import 'package:crisis_survivor/Screens/ForgotPassword.dart';
+import 'package:crisis_survivor/Screens/ForgotPassword.dart';
 import 'package:crisis_survivor/Screens/Roles.dart';
 import 'package:crisis_survivor/Screens/Signup.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -495,17 +495,16 @@ class _LoginState extends State<Login> {
                   top: width / 7,
                   right: width / 25,
                   child: GestureDetector(
-                    onTap: () =>
-                        // showDialog(
-                        //   context: context,
-                        //   builder: (context) => ForgotPasswordDialog(),
-                        // );
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Coming Soon!'),
-                            duration: Duration(seconds: 3),
-                          ),
-                        ),
+                    onTap: () => showDialog(
+                      context: context,
+                      builder: (context) => ForgotPasswordDialog(),
+                    ),
+                    // ScaffoldMessenger.of(context).showSnackBar(
+                    //   const SnackBar(
+                    //     content: Text('Coming Soon!'),
+                    //     duration: Duration(seconds: 3),
+                    //   ),
+                    // ),
                     child: Text(
                       "Forgot Password?",
                       style: GoogleFonts.poppins(
