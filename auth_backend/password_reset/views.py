@@ -159,10 +159,17 @@ def delete_user(request):
             if requester_email != target_email:
                 return JsonResponse({'error': 'Permission denied: only admins can delete others'}, status=403)
 
-        # 🧨 Delete user from Firebase Auth
-        firebase_auth.delete_user(target_uid)
+            # 🧨 Delete user from Firebase Auth
+            firebase_auth.delete_user(target_uid)
 
-        return JsonResponse({'success': True, 'message': f'User {target_uid} deleted'})
+            # 🧹 Also delete from Firestore
+            # Find target doc by email (even if requester deleted them)
+            target_query = users_ref.where('email', '==', target_email).stream()
+            for doc in target_query:
+                doc.reference.delete()
+
+            return JsonResponse({'success': True, 'message': f'User {target_uid} deleted'})
+
 
     except Exception as e:
         return JsonResponse({'error': 'Server error', 'details': str(e)}, status=500)
