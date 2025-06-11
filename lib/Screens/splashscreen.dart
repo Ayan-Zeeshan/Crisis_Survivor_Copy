@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'dart:convert';
 // import 'dart:developer';
+import 'package:crisis_survivor/Admin/adminPage.dart';
 import 'package:crisis_survivor/Consultant/consultantscreen.dart';
 import 'package:crisis_survivor/Donee/doneecreen.dart';
 import 'package:crisis_survivor/Donor/donorscreen.dart';
@@ -74,16 +75,17 @@ class _Splash_ScreenState extends State<Splash_Screen> {
                       const Roles(),
             ),
           );
-        } else if (userDetails['role'] == "Consultant") {
+        } else if ((userDetails['role'].toString()).toLowerCase() == "admin") {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
               builder:
                   (context) => //user ? const ConsultantScreen() :
-                      const ConsultantScreen(),
+                      // const ConsultantScreen(),
+                      const Admin(),
             ),
           );
-        } else if (userDetails['role'] == "Donee") {
+        } else if ((userDetails['role'].toString()).toLowerCase() == "donee") {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -92,7 +94,7 @@ class _Splash_ScreenState extends State<Splash_Screen> {
                       const DoneeScreen(),
             ),
           );
-        } else if (userDetails['role'] == "Donor") {
+        } else if ((userDetails['role'].toString()).toLowerCase() == "donor") {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(

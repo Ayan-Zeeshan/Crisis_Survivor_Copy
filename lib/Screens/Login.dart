@@ -1,4 +1,4 @@
-// ignore_for_file: unused_local_variable, non_constant_identifier_names, avoid_print, no_leading_underscores_for_local_identifiers, use_build_context_synchronously, await_only_futures, unused_import, unnecessary_null_comparison, deprecated_member_use
+// ignore_for_file: unused_local_variable, non_constant_identifier_names, avoid_print, no_leading_underscores_for_local_identifiers, use_build_context_synchronously, await_only_futures, unused_import, unnecessary_null_comparison, deprecated_member_use, file_names
 
 import 'dart:convert';
 import 'dart:developer';
@@ -18,13 +18,24 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Login extends StatefulWidget {
-  const Login({super.key});
+  final String? prefillEmail;
+  final String? prefillPassword;
+
+  const Login({super.key, this.prefillEmail, this.prefillPassword});
 
   @override
   State<Login> createState() => _LoginState();
 }
 
 class _LoginState extends State<Login> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.prefillEmail != null && widget.prefillPassword != null) {
+      retrieveLoginCredentials(widget.prefillEmail!, widget.prefillPassword!);
+    }
+  }
+
   final TextEditingController _myController = TextEditingController();
   final TextEditingController _myController1 = TextEditingController();
   bool visibility = true;
@@ -59,8 +70,23 @@ class _LoginState extends State<Login> {
   //     setState(() => error = "Network error. Try again.");
   //   }
   // }
+
   bool emailExistsOnGoogle = false;
   String? error;
+  void retrieveLoginCredentials([String? email, String? password]) {
+    if (email != null &&
+        password != null &&
+        email.isNotEmpty &&
+        password.isNotEmpty) {
+      setState(() {
+        _myController.text = email;
+        _myController1.text = password;
+        // loginWithFirebase();
+      });
+    } else {
+      return;
+    }
+  }
 
   Future checkEmail(String email, [String? provider]) async {
     setState(() => error = null);
@@ -152,22 +178,24 @@ class _LoginState extends State<Login> {
         setState(() {
           // user = userData['role'] == 'User';
         });
-        if (userDetails['role'] == "" || userDetails['role'] == null) {
+        if ((userDetails['role'].toString()).toLowerCase() == "" ||
+            (userDetails['role'].toString()).toLowerCase() == null) {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const Roles()),
           );
-        } else if (userDetails['role'] == "Consultant") {
+        } else if ((userDetails['role'].toString()).toLowerCase() ==
+            "Consultant") {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const ConsultantScreen()),
           );
-        } else if (userDetails['role'] == "Donor") {
+        } else if ((userDetails['role'].toString()).toLowerCase() == "Donor") {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const DonorScreen()),
           );
-        } else if (userDetails['role'] == "Donee") {
+        } else if ((userDetails['role'].toString()).toLowerCase() == "Donee") {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const DoneeScreen()),

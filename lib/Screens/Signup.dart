@@ -93,7 +93,12 @@ class _Sign_UpState extends State<Sign_Up> {
         );
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => Login()),
+          MaterialPageRoute(
+            builder: (context) => Login(
+              prefillEmail: _myController2.text,
+              prefillPassword: _myController3.text,
+            ),
+          ),
         );
       } else {
         // No account exists, continue with signup
@@ -101,6 +106,7 @@ class _Sign_UpState extends State<Sign_Up> {
           const SnackBar(content: Text('No account found. You can sign up.')),
         );
         signUpWithFirebase();
+        sendDatatoFireStore();
       }
     } catch (e) {
       ScaffoldMessenger.of(
@@ -944,9 +950,12 @@ class _Sign_UpState extends State<Sign_Up> {
                       color2 = Color.fromARGB(204, 0, 0, 0);
                       color3 = Color.fromARGB(204, 0, 0, 0);
                       color4 = Color.fromARGB(204, 0, 0, 0);
-
-                      signUpWithFirebase();
-                      sendDatatoFireStore();
+                      checkIfAccountExistsAndRedirect(
+                        context,
+                        _myController2.text,
+                      );
+                      // signUpWithFirebase();
+                      // sendDatatoFireStore();
                     }
                   });
                 },

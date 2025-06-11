@@ -1,6 +1,9 @@
-// ignore_for_file: file_names, no_leading_underscores_for_local_identifiers, avoid_print
+// ignore_for_file: file_names, no_leading_underscores_for_local_identifiers, avoid_print, use_build_context_synchronously
 
 import 'dart:convert';
+import 'package:crisis_survivor/Admin/adminPage.dart';
+import 'package:crisis_survivor/Donee/doneecreen.dart';
+import 'package:crisis_survivor/Donor/donorscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -32,6 +35,25 @@ class _RolesState extends State<Roles> {
       await _pref.setString('Data', json.encode(userDetails));
 
       print("Cache updated: $userDetails");
+      switch (newRole) {
+        case 'admin':
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => Admin()),
+          );
+        case 'donor':
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => DonorScreen()),
+          );
+        case 'donee':
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => DoneeScreen()),
+          );
+        default:
+          return;
+      }
     } else {
       print("No cache found to update.");
     }
@@ -162,7 +184,7 @@ class _RolesState extends State<Roles> {
           SizedBox(height: (width / 69.55)),
           ElevatedButton(
             onPressed: () {
-              updateUserRoleInCache(null);
+              updateUserRoleInCache('admin');
             },
             child: Text("Update"),
           ),
