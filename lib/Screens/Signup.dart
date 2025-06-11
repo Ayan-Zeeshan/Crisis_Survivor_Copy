@@ -42,6 +42,41 @@ class _Sign_UpState extends State<Sign_Up> {
   User? user;
   bool emailExists = false;
   String? error;
+  void _showSnack(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), duration: Duration(seconds: 2)),
+    );
+  }
+
+  void _setErrorColors({
+    bool all = false,
+    bool emailOnly = false,
+    bool passOnly = false,
+  }) {
+    setState(() {
+      if (all || emailOnly) {
+        color2 = Colors.red;
+        bordercolor2 = Colors.red;
+      }
+      if (all || passOnly) {
+        color3 = Colors.red;
+        color4 = Colors.red;
+        bordercolor3 = Colors.red;
+        bordercolor4 = Colors.red;
+      }
+      if (all) {
+        color1 = Colors.red;
+        bordercolor1 = Colors.red;
+      }
+    });
+  }
+
+  void _resetColors() {
+    setState(() {
+      color1 = color2 = color3 = color4 = const Color.fromARGB(204, 0, 0, 0);
+      bordercolor1 = bordercolor2 = bordercolor3 = bordercolor4 = Colors.white;
+    });
+  }
 
   Future checkEmail(String email) async {
     setState(() => error = null);
@@ -178,7 +213,7 @@ class _Sign_UpState extends State<Sign_Up> {
     final dataList = {
       "username": _myController.text,
       "email": _myController2.text,
-      "role": null,
+      "role": "donee",
       "time": DateTime.now().toString(),
     };
 
@@ -220,7 +255,7 @@ class _Sign_UpState extends State<Sign_Up> {
         final userData = {
           'username': username,
           'email': email,
-          'role': null,
+          'role': 'donee',
           'time': DateTime.now().toString(),
         };
 
@@ -276,7 +311,7 @@ class _Sign_UpState extends State<Sign_Up> {
   //       final userData = {
   //         'username': username,
   //         'email': email,
-  //         'role': null,
+  //         'role': 'donee',
   //         'time': DateTime.now().toString(),
   //       };
 
@@ -864,112 +899,60 @@ class _Sign_UpState extends State<Sign_Up> {
             Padding(
               padding: EdgeInsets.symmetric(vertical: width / 100.0),
               child: ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    isButtonClicked = true;
-                    if (_myController.text.isEmpty ||
-                        _myController2.text.isEmpty ||
-                        _myController3.text.isEmpty ||
-                        _myController4.text.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Fields Empty!'),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
+                onPressed: () async {
+                  setState(() => isButtonClicked = true);
 
-                      color1 = Colors.red;
-                      color2 = Colors.red;
-                      color3 = Colors.red;
-                      color4 = Colors.red;
-                      bordercolor1 = Colors.red;
-                      bordercolor2 = Colors.red;
-                      bordercolor3 = Colors.red;
-                      bordercolor4 = Colors.red;
-                    } else if (_myController3.text.length < 8) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Passwords should be minimum 8 characters long!',
-                          ),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                      color1 = Color.fromARGB(204, 0, 0, 0);
-                      color2 = Color.fromARGB(204, 0, 0, 0);
-                      color3 = Colors.red;
-                      color4 = Colors.red;
-                      bordercolor1 = Colors.white;
-                      bordercolor2 = Colors.white;
-                      bordercolor3 = Colors.red;
-                      bordercolor4 = Colors.red;
-                    } else if (_myController3.text != _myController4.text) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Passwords do not Match!'),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                      color1 = Color.fromARGB(204, 0, 0, 0);
-                      color2 = Color.fromARGB(204, 0, 0, 0);
-                      color3 = Colors.red;
-                      color4 = Colors.red;
-                      bordercolor1 = Colors.white;
-                      bordercolor2 = Colors.white;
-                      bordercolor3 = Colors.red;
-                      bordercolor4 = Colors.red;
-                    } else if (!_myController2.text.endsWith("@gmail.com")) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Emails should only end with @gmail.com',
-                          ),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                      color1 = Color.fromARGB(204, 0, 0, 0);
-                      color2 = Colors.red;
-                      color3 = Color.fromARGB(204, 0, 0, 0);
-                      color4 = Color.fromARGB(204, 0, 0, 0);
-                      bordercolor1 = Colors.white;
-                      bordercolor2 = Colors.red;
-                      bordercolor3 = Colors.white;
-                      bordercolor4 = Colors.white;
-                    } else if (_myController4.text.isNotEmpty &&
-                        _myController2.text.isNotEmpty &&
-                        _myController3.text.isNotEmpty &&
-                        _myController4.text == _myController3.text &&
-                        isButtonClicked &&
-                        _myController2.text.endsWith("@gmail.com") &&
-                        _myController3.text.length >= 8) {
-                      bordercolor1 = Colors.white;
-                      bordercolor2 = Colors.white;
-                      bordercolor3 = Colors.white;
-                      bordercolor4 = Colors.white;
-                      color1 = Color.fromARGB(204, 0, 0, 0);
-                      color2 = Color.fromARGB(204, 0, 0, 0);
-                      color3 = Color.fromARGB(204, 0, 0, 0);
-                      color4 = Color.fromARGB(204, 0, 0, 0);
-                      checkIfAccountExistsAndRedirect(
-                        context,
-                        _myController2.text,
-                      );
-                      // signUpWithFirebase();
-                      // sendDatatoFireStore();
-                    }
-                  });
+                  final name = _myController.text.trim();
+                  final phone = _myController2.text.trim();
+                  final email = _myController2.text.trim();
+                  final pass = _myController3.text;
+                  final confirmPass = _myController4.text;
+
+                  // 🟥 Empty fields
+                  if ([name, email, pass, confirmPass].any((e) => e.isEmpty)) {
+                    _showSnack("All fields are required!");
+                    _setErrorColors(all: true);
+                    return;
+                  }
+
+                  // 🟨 Weak password check
+                  if (pass.length < 8 ||
+                      !RegExp(r'[0-9]').hasMatch(pass) ||
+                      !RegExp(r'[a-zA-Z]').hasMatch(pass)) {
+                    _showSnack(
+                      "Password must be 8+ chars, include letters & numbers.",
+                    );
+                    _setErrorColors(passOnly: true);
+                    return;
+                  }
+
+                  // 🟩 Password mismatch
+                  if (pass != confirmPass) {
+                    _showSnack("Passwords do not match!");
+                    _setErrorColors(passOnly: true);
+                    return;
+                  }
+
+                  // 🟦 Email domain (allowing ANY domain, just basic validation)
+                  if (!RegExp(r"^[\w\.-]+@[\w\.-]+\.\w+$").hasMatch(email)) {
+                    _showSnack("Enter a valid email (e.g. name@example.com)");
+                    _setErrorColors(emailOnly: true);
+                    return;
+                  }
+
+                  // ✅ All Good → continue
+                  _resetColors();
+                  checkIfAccountExistsAndRedirect(context, email);
                 },
                 style: ElevatedButton.styleFrom(
                   fixedSize: Size(width / 1.12, width / 7.5),
-                  backgroundColor: Color.fromARGB(194, 86, 61, 61),
+                  backgroundColor: const Color.fromARGB(194, 86, 61, 61),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(Radius.circular(width / 50)),
                     side: const BorderSide(
                       color: Color.fromARGB(194, 86, 61, 61),
                     ),
                   ),
-                  // shadowColor: Color.fromARGB(194, 86, 61, 61),
-                  // surfaceTintColor: Color.fromARGB(194, 86, 61, 61),
                 ),
                 child: Text(
                   "Continue",
@@ -981,6 +964,127 @@ class _Sign_UpState extends State<Sign_Up> {
                 ),
               ),
             ),
+
+            // Padding(
+            //   padding: EdgeInsets.symmetric(vertical: width / 100.0),
+            //   child: ElevatedButton(
+            //     onPressed: () {
+            //       setState(() {
+            //         isButtonClicked = true;
+            //         if (_myController.text.isEmpty ||
+            //             _myController2.text.isEmpty ||
+            //             _myController3.text.isEmpty ||
+            //             _myController4.text.isEmpty) {
+            //           ScaffoldMessenger.of(context).showSnackBar(
+            //             const SnackBar(
+            //               content: Text('Fields Empty!'),
+            //               duration: Duration(seconds: 2),
+            //             ),
+            //           );
+
+            //           color1 = Colors.red;
+            //           color2 = Colors.red;
+            //           color3 = Colors.red;
+            //           color4 = Colors.red;
+            //           bordercolor1 = Colors.red;
+            //           bordercolor2 = Colors.red;
+            //           bordercolor3 = Colors.red;
+            //           bordercolor4 = Colors.red;
+            //         } else if (_myController3.text.length < 8) {
+            //           ScaffoldMessenger.of(context).showSnackBar(
+            //             const SnackBar(
+            //               content: Text(
+            //                 'Passwords should be minimum 8 characters long!',
+            //               ),
+            //               duration: Duration(seconds: 2),
+            //             ),
+            //           );
+            //           color1 = Color.fromARGB(204, 0, 0, 0);
+            //           color2 = Color.fromARGB(204, 0, 0, 0);
+            //           color3 = Colors.red;
+            //           color4 = Colors.red;
+            //           bordercolor1 = Colors.white;
+            //           bordercolor2 = Colors.white;
+            //           bordercolor3 = Colors.red;
+            //           bordercolor4 = Colors.red;
+            //         } else if (_myController3.text != _myController4.text) {
+            //           ScaffoldMessenger.of(context).showSnackBar(
+            //             const SnackBar(
+            //               content: Text('Passwords do not Match!'),
+            //               duration: Duration(seconds: 2),
+            //             ),
+            //           );
+            //           color1 = Color.fromARGB(204, 0, 0, 0);
+            //           color2 = Color.fromARGB(204, 0, 0, 0);
+            //           color3 = Colors.red;
+            //           color4 = Colors.red;
+            //           bordercolor1 = Colors.white;
+            //           bordercolor2 = Colors.white;
+            //           bordercolor3 = Colors.red;
+            //           bordercolor4 = Colors.red;
+            //         } else if (!_myController2.text.endsWith("@gmail.com")) {
+            //           ScaffoldMessenger.of(context).showSnackBar(
+            //             const SnackBar(
+            //               content: Text(
+            //                 'Emails should only end with @gmail.com',
+            //               ),
+            //               duration: Duration(seconds: 2),
+            //             ),
+            //           );
+            //           color1 = Color.fromARGB(204, 0, 0, 0);
+            //           color2 = Colors.red;
+            //           color3 = Color.fromARGB(204, 0, 0, 0);
+            //           color4 = Color.fromARGB(204, 0, 0, 0);
+            //           bordercolor1 = Colors.white;
+            //           bordercolor2 = Colors.red;
+            //           bordercolor3 = Colors.white;
+            //           bordercolor4 = Colors.white;
+            //         } else if (_myController4.text.isNotEmpty &&
+            //             _myController2.text.isNotEmpty &&
+            //             _myController3.text.isNotEmpty &&
+            //             _myController4.text == _myController3.text &&
+            //             isButtonClicked &&
+            //             _myController2.text.endsWith("@gmail.com") &&
+            //             _myController3.text.length >= 8) {
+            //           bordercolor1 = Colors.white;
+            //           bordercolor2 = Colors.white;
+            //           bordercolor3 = Colors.white;
+            //           bordercolor4 = Colors.white;
+            //           color1 = Color.fromARGB(204, 0, 0, 0);
+            //           color2 = Color.fromARGB(204, 0, 0, 0);
+            //           color3 = Color.fromARGB(204, 0, 0, 0);
+            //           color4 = Color.fromARGB(204, 0, 0, 0);
+            //           checkIfAccountExistsAndRedirect(
+            //             context,
+            //             _myController2.text,
+            //           );
+            //           // signUpWithFirebase();
+            //           // sendDatatoFireStore();
+            //         }
+            //       });
+            //     },
+            //     style: ElevatedButton.styleFrom(
+            //       fixedSize: Size(width / 1.12, width / 7.5),
+            //       backgroundColor: Color.fromARGB(194, 86, 61, 61),
+            //       shape: RoundedRectangleBorder(
+            //         borderRadius: BorderRadius.all(Radius.circular(width / 50)),
+            //         side: const BorderSide(
+            //           color: Color.fromARGB(194, 86, 61, 61),
+            //         ),
+            //       ),
+            //       // shadowColor: Color.fromARGB(194, 86, 61, 61),
+            //       // surfaceTintColor: Color.fromARGB(194, 86, 61, 61),
+            //     ),
+            //     child: Text(
+            //       "Continue",
+            //       style: GoogleFonts.poppins(
+            //         color: const Color.fromARGB(253, 255, 255, 255),
+            //         fontSize: (width / 25.55),
+            //         fontWeight: FontWeight.bold,
+            //       ),
+            //     ),
+            //   ),
+            // ),
             SizedBox(height: width / 28),
 
             SizedBox(

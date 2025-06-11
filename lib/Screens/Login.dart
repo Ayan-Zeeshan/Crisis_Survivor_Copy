@@ -9,6 +9,7 @@ import 'package:crisis_survivor/Donor/donorscreen.dart';
 import 'package:crisis_survivor/Screens/ForgotPassword.dart';
 import 'package:crisis_survivor/Screens/Roles.dart';
 import 'package:crisis_survivor/Screens/Signup.dart';
+import 'package:crisis_survivor/Screens/roleBasedNavigation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -178,28 +179,39 @@ class _LoginState extends State<Login> {
         setState(() {
           // user = userData['role'] == 'User';
         });
-        if ((userDetails['role'].toString()).toLowerCase() == "" ||
-            (userDetails['role'].toString()).toLowerCase() == null) {
+        if (userDetails['role'] != null ||
+            (userDetails['role'].toString()).isNotEmpty) {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const Roles()),
-          );
-        } else if ((userDetails['role'].toString()).toLowerCase() == "admin") {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const Admin()),
-          );
-        } else if ((userDetails['role'].toString()).toLowerCase() == "Donor") {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const DonorScreen()),
-          );
-        } else if ((userDetails['role'].toString()).toLowerCase() == "Donee") {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const DoneeScreen()),
+            MaterialPageRoute(
+              builder: (context) => RoleBasedHome(
+                role: (userDetails['role'].toString()).toLowerCase(),
+              ),
+            ),
           );
         }
+        // if ((userDetails['role'].toString()).toLowerCase() == "" ||
+        //     (userDetails['role'].toString()).toLowerCase() == null) {
+        //   Navigator.pushReplacement(
+        //     context,
+        //     MaterialPageRoute(builder: (context) => const Roles()),
+        //   );
+        // } else if ((userDetails['role'].toString()).toLowerCase() == "admin") {
+        //   Navigator.pushReplacement(
+        //     context,
+        //     MaterialPageRoute(builder: (context) => const Admin()),
+        //   );
+        // } else if ((userDetails['role'].toString()).toLowerCase() == "Donor") {
+        //   Navigator.pushReplacement(
+        //     context,
+        //     MaterialPageRoute(builder: (context) => const DonorScreen()),
+        //   );
+        // } else if ((userDetails['role'].toString()).toLowerCase() == "Donee") {
+        //   Navigator.pushReplacement(
+        //     context,
+        //     MaterialPageRoute(builder: (context) => const DoneeScreen()),
+        //   );
+        // }
       }
     } catch (e) {
       ScaffoldMessenger.of(

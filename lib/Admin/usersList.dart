@@ -49,26 +49,9 @@
 
 //   Future<void> deleteDocument(String documentId, String emailToDelete) async {
 //     try {
-//       // Check if the email to delete exists in Firestore
-//       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-//           .collection('users')
-//           .where('email', isEqualTo: emailToDelete)
-//           .get();
-
-//       if (querySnapshot.docs.isEmpty) {
-//         ScaffoldMessenger.of(context).showSnackBar(
-//           const SnackBar(
-//             content: Text('User not found!'),
-//             duration: Duration(seconds: 3),
-//           ),
-//         );
-//         return;
-//       }
-
-//       // Make request to backend to verify admin rights and delete
 //       final response = await http.post(
 //         Uri.parse(
-//           "https://authbackend-production-ed7f.up.railway.app/api/delete-code/",
+//           "https://authbackend-production-ed7f.up.railway.app/api/delete-user/",
 //         ),
 //         headers: {'Content-Type': 'application/json'},
 //         body: jsonEncode({
@@ -80,19 +63,15 @@
 //       final data = jsonDecode(response.body);
 
 //       if (response.statusCode == 200 && data['success'] == true) {
-//         // Delete the user's Firestore document
-//         await querySnapshot.docs.first.reference.delete();
-
 //         ScaffoldMessenger.of(context).showSnackBar(
 //           const SnackBar(
 //             content: Text('User Successfully Deleted!'),
 //             duration: Duration(seconds: 3),
 //           ),
 //         );
-
 //         setState(() {});
 //       } else {
-//         error = data['error'] ?? "Invalid or expired code.";
+//         error = data['error'] ?? "Something went wrong.";
 //         ScaffoldMessenger.of(context).showSnackBar(
 //           SnackBar(
 //             content: Text('User Deletion Failed: $error'),
@@ -214,6 +193,7 @@ import 'package:crisis_survivor/Admin/editUsers.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Users extends StatefulWidget {
   const Users({super.key});
@@ -274,7 +254,20 @@ class _UsersState extends State<Users> {
             duration: Duration(seconds: 3),
           ),
         );
-        setState(() {});
+
+        // If the admin deleted themselves, log them out and navigate to login
+        if (emailToDelete == requester_email) {
+          await FirebaseAuth.instance.signOut();
+          SharedPreferences _pref = await SharedPreferences.getInstance();
+          await _pref.clear();
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/signup',
+            (route) => false,
+          );
+        } else {
+          setState(() {});
+        }
       } else {
         error = data['error'] ?? "Something went wrong.";
         ScaffoldMessenger.of(context).showSnackBar(
