@@ -3,7 +3,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:crisis_survivor/Consultant/consultantscreen.dart';
+import 'package:crisis_survivor/Admin/adminPage.dart';
 import 'package:crisis_survivor/Donee/doneecreen.dart';
 import 'package:crisis_survivor/Donor/donorscreen.dart';
 import 'package:crisis_survivor/Screens/ForgotPassword.dart';
@@ -184,11 +184,10 @@ class _LoginState extends State<Login> {
             context,
             MaterialPageRoute(builder: (context) => const Roles()),
           );
-        } else if ((userDetails['role'].toString()).toLowerCase() ==
-            "Consultant") {
+        } else if ((userDetails['role'].toString()).toLowerCase() == "admin") {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const ConsultantScreen()),
+            MaterialPageRoute(builder: (context) => const Admin()),
           );
         } else if ((userDetails['role'].toString()).toLowerCase() == "Donor") {
           Navigator.pushReplacement(
