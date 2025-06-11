@@ -44,7 +44,6 @@ class _UsersState extends State<Users> {
                 } else {
                   QuerySnapshot querySnapshot = snapshot.data!;
                   List<DocumentSnapshot> documents = querySnapshot.docs;
-
                   return ListView.builder(
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
@@ -52,6 +51,10 @@ class _UsersState extends State<Users> {
                     itemBuilder: (context, index) {
                       Map<String, dynamic> data =
                           documents[index].data() as Map<String, dynamic>;
+
+                      print(
+                        ((data['role'].toString()).split(""))[0].toUpperCase(),
+                      );
 
                       return ListTile(
                         title: Text(
@@ -72,10 +75,7 @@ class _UsersState extends State<Users> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              ((data['role'].toString()).split(
-                                    "",
-                                  ))[0].toUpperCase() ??
-                                  "Unassigned",
+                              data['role'] ?? "Unassigned",
                               style: const TextStyle(color: Colors.black),
                             ),
                             IconButton(
