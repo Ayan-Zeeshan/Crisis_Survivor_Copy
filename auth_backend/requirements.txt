@@ -22,7 +22,6 @@ google-resumable-media==2.7.2
 googleapis-common-protos==1.70.0
 grpcio==1.73.0
 grpcio-status==1.73.0
-waitress
 h11==0.16.0
 h2==4.2.0
 hpack==4.1.0
@@ -32,6 +31,7 @@ httpx==0.28.1
 hyperframe==6.1.0
 idna==3.10
 msgpack==1.1.0
+packaging==25.0
 proto-plus==1.26.1
 protobuf==6.31.1
 pyasn1==0.6.1
@@ -51,3 +51,5 @@ tzdata==2025.2
 upstash-redis==1.4.0
 uritemplate==4.2.0
 urllib3==2.4.0
+waitress==3.0.2
+whitenoise==6.9.0
