@@ -1,5 +1,6 @@
 // ignore_for_file: file_names
 
+import 'package:crisis_survivor/Admin/usersList.dart';
 import 'package:flutter/material.dart';
 
 class Admin extends StatefulWidget {
@@ -15,8 +16,17 @@ class _AdminState extends State<Admin> {
     return Scaffold(
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [Center(child: Text("Admin!"))],
+        children: [
+          ElevatedButton(
+            onPressed: () => Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => Users()),
+            ),
+            child: Text("User List"),
+          ),
+        ],
       ),
+      backgroundColor: Color(0xFFF2EDF6),
     );
   }
 }

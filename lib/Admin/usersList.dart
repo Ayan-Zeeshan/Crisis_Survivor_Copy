@@ -2,17 +2,17 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:crisis_survivor/Admin/editScreen.dart';
+import 'package:crisis_survivor/Admin/editUsers.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class Data extends StatefulWidget {
-  const Data({super.key});
+class Users extends StatefulWidget {
+  const Users({super.key});
 
   @override
-  State<Data> createState() => _DataState();
+  State<Users> createState() => _UsersState();
 }
 
-class _DataState extends State<Data> {
+class _UsersState extends State<Users> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
@@ -72,7 +72,10 @@ class _DataState extends State<Data> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              data['role'],
+                              ((data['role'].toString()).split(
+                                    "",
+                                  ))[0].toUpperCase() ??
+                                  "Unassigned",
                               style: const TextStyle(color: Colors.black),
                             ),
                             IconButton(
