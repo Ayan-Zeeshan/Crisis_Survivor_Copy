@@ -183,16 +183,16 @@ class _Sign_UpState extends State<Sign_Up> {
     };
 
     SharedPreferences _pref = await SharedPreferences.getInstance();
-    await _db.collection("users").add(dataList).whenComplete(() async {
-      final Map<String, dynamic> userDetails = {
-        'username': dataList['username'],
-        'email': dataList['email'],
-        'role': null,
-        'time': DateTime.now().toString(),
-      };
-      await _pref.setString('Data', json.encode(userDetails));
-    });
-    setState() {}
+
+    // Use Firebase Auth user UID as document ID
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await _db.collection("users").doc(user.uid).set(dataList);
+
+      await _pref.setString('Data', json.encode(dataList));
+    }
+
+    setState(() {});
   }
 
   Future<void> signInWithGoogle() async {
