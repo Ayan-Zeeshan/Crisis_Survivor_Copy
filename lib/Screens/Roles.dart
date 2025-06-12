@@ -2,7 +2,7 @@
 
 import 'dart:convert';
 import 'package:crisis_survivor/Admin/adminPage.dart';
-import 'package:crisis_survivor/Donee/doneecreen.dart';
+import 'package:crisis_survivor/Donee/victimscreen.dart';
 import 'package:crisis_survivor/Donor/donorscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -49,7 +49,7 @@ class _RolesState extends State<Roles> {
         case 'donee':
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => DoneeScreen()),
+            MaterialPageRoute(builder: (context) => victimScreen()),
           );
         default:
           return;

@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crisis_survivor/Admin/adminPage.dart';
-import 'package:crisis_survivor/Donee/doneecreen.dart';
+import 'package:crisis_survivor/Donee/victimscreen.dart';
 import 'package:crisis_survivor/Donor/donorscreen.dart';
 import 'package:crisis_survivor/Screens/ForgotPassword.dart';
 import 'package:crisis_survivor/Screens/Roles.dart';
@@ -209,7 +209,7 @@ class _LoginState extends State<Login> {
         // } else if ((userDetails['role'].toString()).toLowerCase() == "Donee") {
         //   Navigator.pushReplacement(
         //     context,
-        //     MaterialPageRoute(builder: (context) => const DoneeScreen()),
+        //     MaterialPageRoute(builder: (context) => const victimScreen()),
         //   );
         // }
       }

@@ -152,12 +152,13 @@ class _Sign_UpState extends State<Sign_Up> {
 
   void signUpWithFirebase() {
     try {
-      final credentials = FirebaseAuth.instance
+      FirebaseAuth.instance
           .createUserWithEmailAndPassword(
             email: _myController2.text,
             password: _myController4.text,
           )
           .then((value) {
+            sendDatatoFireStore(); // ✅ Move here: only after user is created
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Account Created Successfully!'),

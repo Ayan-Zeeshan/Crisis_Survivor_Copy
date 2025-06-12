@@ -1,6 +1,6 @@
 // ignore_for_file: file_names, use_build_context_synchronously
 import 'package:crisis_survivor/Admin/adminPage.dart';
-import 'package:crisis_survivor/Donee/doneecreen.dart';
+import 'package:crisis_survivor/Donee/victimscreen.dart';
 import 'package:crisis_survivor/Donor/donorscreen.dart';
 import 'package:crisis_survivor/Screens/Roles.dart';
 import 'package:crisis_survivor/auth_guard.dart';
@@ -25,10 +25,13 @@ class _RoleBasedHomeState extends State<RoleBasedHome> {
   Widget build(BuildContext context) {
     if (widget.role == 'donor') {
       return DonorScreen();
+      // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => DonorScreen()));
     } else if (widget.role == 'donee') {
-      return DoneeScreen();
+      return victimScreen();
+      // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => victimScreen()));
     } else if (widget.role == 'admin') {
       return Admin();
+      // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Admin()));
     } else {
       return Roles(); // fallback if something went wrong
     }

@@ -1,0 +1,6 @@
+// ignore_for_file: non_constant_identifier_names
+
+String publishable_key =
+    "pk_test_51RZ9pcP3oB3eSucuzMYp768G4J8TQPB4tD4t0gbQf3ePfkDCxAFNG8PsjFKR5X4B4twDGHbNaFmfvnKeW8XNPLOZ00WV8Pk6TP";
+String secret_key =
+    "sk_test_51RZ9pcP3oB3eSucuqA4JwLcDjl3Yt30SwBy5dCr4zWGEsleUXRWs9W2YRGti3f5vk4NJOFsLcppgbLbLpZTmheDp00ygD1wzIr";
