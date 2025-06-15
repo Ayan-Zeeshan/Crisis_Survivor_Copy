@@ -1,9 +1,9 @@
-import random, string
+import random, string 
 from django.core.mail import send_mail
 from django.http import JsonResponse
 from .firebase import*
-from .firebase import auth as firebase_auth  # ✅ Use initialized firebase from firebase.py
-from .redis_client import redis  # ✅ Use shared redis instance
+from .firebase import auth as firebase_auth
+from .redis_client import redis
 from django.views.decorators.csrf import csrf_exempt
 import os
 import json
@@ -11,8 +11,13 @@ from django.conf import settings
 from dotenv import load_dotenv
 import firebase_admin
 from firebase_admin import credentials, firestore
-from password_reset.utils.encryption import generate_ecc_keys, hybrid_encrypt, hybrid_decrypt
+from password_reset.utils.encryption import generate_ecc_keys, hybrid_encrypt, hybrid_decrypt, aes_decrypt
 
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.backends import default_backend
+
+# Init Firebase DB
+db = firestore.client()
 
 @csrf_exempt
 def check_email_exists(request, provider=None):
@@ -22,7 +27,7 @@ def check_email_exists(request, provider=None):
     try:
         data = json.loads(request.body)
         email = data.get('email')
-        provider = data.get('provider')  # ✅ Optionally passed
+        provider = data.get('provider')
 
         if not email:
             return JsonResponse({'error': 'Email required'}, status=400)
@@ -33,7 +38,6 @@ def check_email_exists(request, provider=None):
         except firebase_auth.UserNotFoundError:
             return JsonResponse({'exists': False})
 
-        # ✅ If provider filter is given, check it
         if provider:
             sign_in_methods = user.provider_data
             method_ids = [p.provider_id for p in sign_in_methods]
@@ -41,18 +45,42 @@ def check_email_exists(request, provider=None):
                 return JsonResponse({'exists': False})
             return JsonResponse({'exists': True, 'provider': provider})
         else:
-            # No provider filter, return general existence
             all_providers = [p.provider_id for p in user.provider_data]
             return JsonResponse({'exists': True, 'provider': all_providers[0] if all_providers else None})
 
     except Exception as e:
         return JsonResponse({'error': 'Server error', 'details': str(e)}, status=500)
 
-
-redis = redis.StrictRedis(host='localhost', port=6379, db=0)
-
 def generate_code(length=8):
     return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
+
+def get_decryption_keys():
+    config_doc = db.collection("config").document("encryption_metadata").get()
+    config_data = config_doc.to_dict()
+
+    encrypted_ecc_key = config_data["encrypted_ecc_key"]
+    encrypted_aes_key = config_data["encrypted_aes_key"]
+
+    master_ecc_key_pem = os.getenv("MASTER_ECC_PRIVATE_KEY")
+    master_private_key = serialization.load_pem_private_key(
+        master_ecc_key_pem.encode(), password=None, backend=default_backend()
+    )
+    master_pem_str = master_private_key.private_bytes(
+        serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8,
+        serialization.NoEncryption()
+    ).decode()
+
+    ecc_pem = hybrid_decrypt(master_pem_str, encrypted_ecc_key)["ecc_key"]
+    ecc_private_key = serialization.load_pem_private_key(
+        ecc_pem.encode(), password=None, backend=default_backend()
+    )
+    ecc_pem_str = ecc_private_key.private_bytes(
+        serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8,
+        serialization.NoEncryption()
+    ).decode()
+
+    aes_hex = hybrid_decrypt(ecc_pem_str, encrypted_aes_key)["aes_key"]
+    return bytes.fromhex(aes_hex)
 
 @csrf_exempt
 def send_reset_code(request):
@@ -62,14 +90,29 @@ def send_reset_code(request):
     try:
         data = json.loads(request.body)
         email = data.get('email')
-
         if not email:
             return JsonResponse({'error': 'Email required'}, status=400)
 
-        try:
-            user = firebase_auth.get_user_by_email(email)
-        except firebase_auth.UserNotFoundError:
-            return JsonResponse({'error': 'User not found'}, status=404)
+        # Decrypt and verify user exists in Firestore
+        aes_key = get_decryption_keys()
+        encrypted_email = None
+        users_ref = db.collection("users")
+        users = users_ref.stream()
+        match_found = False
+        for doc in users:
+            enc_data = doc.to_dict()
+            try:
+                dec_email = aes_decrypt(aes_key, enc_data.get("email", ""))
+                if dec_email == email:
+                    match_found = True
+                    break
+            except:
+                continue
+
+        if not match_found:
+            return JsonResponse({'error': 'User not found in Firestore'}, status=404)
+
+        user = firebase_auth.get_user_by_email(email)
 
         reset_code = str(random.randint(100000, 999999))
         redis.setex(f"reset:{email}", 300, reset_code)
@@ -101,13 +144,13 @@ def verify_code(request):
         return JsonResponse({'error': 'Code expired or not found'}, status=400)
 
     if stored_code.decode('utf-8') != code:
-        redis.delete(f'reset:{email}')  # Invalidate code after incorrect use
+        redis.delete(f'reset:{email}')
         return JsonResponse({'error': 'Invalid code'}, status=401)
 
     user = firebase_auth.get_user_by_email(email)
     custom_token = firebase_auth.create_custom_token(user.uid)
 
-    redis.delete(f'reset:{email}')  # Invalidate after correct use
+    redis.delete(f'reset:{email}')
 
     return JsonResponse({
         'success': True,
