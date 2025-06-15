@@ -227,7 +227,7 @@ def run():
         }.items():
             res = requests.post(url, headers=headers, json=mutation(var_name, var_val))
             if res.status_code == 200:
-                print(f"✅ Updated {var_name} on Railway.", flush=True)
+                print(f"✅ Updated {var_name} and {var_val} on Railway.", flush=True)
             else:
                 print(f"❌ Failed to update {var_name}: {res.text}", flush=True)
 
