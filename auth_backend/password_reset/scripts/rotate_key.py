@@ -21,7 +21,7 @@ def run():
 
         RAILWAY_TOKEN = os.environ.get("RAILWAY_API_TOKEN")
         PROJECT_ID = os.environ.get("RAILWAY_PROJECT_ID")
-        ENV_ID = os.environ.get("RAILWAY_ENV_ID")
+        ENV_ID = os.environ.get("RAILWAY_ENVIRONMENT_ID")
 
         if not all([RAILWAY_TOKEN, PROJECT_ID, ENV_ID]):
             raise Exception("RAILWAY_API_TOKEN, RAILWAY_PROJECT_ID, or RAILWAY_ENV_ID is missing.")
