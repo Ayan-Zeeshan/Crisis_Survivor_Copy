@@ -219,8 +219,7 @@ def run():
 
     # Final instructions for Railway
     print("\n🚨 Update these Railway ENV Vars manually:")
-    print("→ ENCRYPTION_PRIVATE_KEY=\n" + new_private_key)
-    print("→ ENCRYPTION_PUBLIC_KEY=\n" + new_public_key)
+    auto_update_env_on_railway(new_private_key,new_public_key)
 
     # Optional: Auto-push to Railway API (commented by default)
     # auto_update_env_on_railway(new_private_key, new_public_key)
