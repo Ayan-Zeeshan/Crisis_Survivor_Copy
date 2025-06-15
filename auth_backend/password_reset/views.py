@@ -49,6 +49,8 @@ def check_email_exists(request, provider=None):
         return JsonResponse({'error': 'Server error', 'details': str(e)}, status=500)
 
 
+redis = redis.StrictRedis(host='localhost', port=6379, db=0)
+
 def generate_code(length=8):
     return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
 
@@ -85,28 +87,6 @@ def send_reset_code(request):
     except Exception as e:
         return JsonResponse({'error': 'Server error', 'details': str(e)}, status=500)
 
-# @csrf_exempt
-# def verify_code(request):
-#     if request.method != 'POST':
-#         return JsonResponse({'error': 'Invalid method'}, status=405)
-
-#     data = json.loads(request.body)
-#     email = data.get('email')
-#     code = data.get('code')
-
-#     stored_code = redis.get(f'reset:{email}')
-#     if stored_code is None:
-#         return JsonResponse({'error': 'Code expired or not found'}, status=400)
-
-#     if stored_code.decode('utf-8') != code:
-#         return JsonResponse({'error': 'Invalid code'}, status=401)
-
-#     user = firebase_auth.get_user_by_email(email)
-#     custom_token = firebase_auth.create_custom_token(user.uid)
-
-#     redis.delete(f'reset:{email}')
-
-#     return JsonResponse({'token': custom_token.decode('utf-8')})
 @csrf_exempt
 def verify_code(request):
     if request.method != 'POST':
@@ -120,14 +100,14 @@ def verify_code(request):
     if stored_code is None:
         return JsonResponse({'error': 'Code expired or not found'}, status=400)
 
-    if stored_code != code:
-    #.decode('utf-8')
+    if stored_code.decode('utf-8') != code:
+        redis.delete(f'reset:{email}')  # Invalidate code after incorrect use
         return JsonResponse({'error': 'Invalid code'}, status=401)
 
     user = firebase_auth.get_user_by_email(email)
     custom_token = firebase_auth.create_custom_token(user.uid)
 
-    redis.delete(f'reset:{email}')
+    redis.delete(f'reset:{email}')  # Invalidate after correct use
 
     return JsonResponse({
         'success': True,
