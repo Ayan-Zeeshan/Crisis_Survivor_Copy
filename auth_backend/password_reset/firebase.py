@@ -5,6 +5,10 @@ from dotenv import load_dotenv
 from firebase_admin import firestore
 
 load_dotenv()  # in case you're loading from .env
+# import json
+# firebase_key = json.loads(os.environ["FIREBASE_SERVICE_ACCOUNT_JSON"])
+# firebase_key["private_key"] = firebase_key["private_key"].replace("\\n", "\n")
+# cred = credentials.Certificate(firebase_key)
 
 if not firebase_admin._apps:
     cred = credentials.Certificate({

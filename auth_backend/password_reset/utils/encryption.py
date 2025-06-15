@@ -93,11 +93,24 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Load master ECC private key from .env
-MASTER_ECC_PRIVATE_KEY_PEM = os.getenv("MASTER_ECC_PRIVATE_KEY").encode()
-MASTER_ECC_PRIVATE_KEY = serialization.load_pem_private_key(
-    MASTER_ECC_PRIVATE_KEY_PEM,
-    password=None
-)
+# raw_key = os.getenv("MASTER_ECC_PRIVATE_KEY")
+
+# if not raw_key:
+#     raise ValueError("Missing MASTER_ECC_PRIVATE_KEY environment variable")
+
+# # Convert escaped newlines to actual newlines
+# pem_key = raw_key.replace("\\n", "\n").encode()
+
+# # Load ECC private key
+# MASTER_ECC_PRIVATE_KEY = serialization.load_pem_private_key(
+#     pem_key,
+#     password=None,
+# )
+# MASTER_ECC_PRIVATE_KEY_PEM = os.getenv("MASTER_ECC_PRIVATE_KEY").encode()
+# MASTER_ECC_PRIVATE_KEY = serialization.load_pem_private_key(
+#     MASTER_ECC_PRIVATE_KEY_PEM,
+#     password=None
+# )
 
 def get_master_public_key():
     return MASTER_ECC_PRIVATE_KEY.public_key()
