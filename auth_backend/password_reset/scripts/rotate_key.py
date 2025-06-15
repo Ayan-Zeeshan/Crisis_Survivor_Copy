@@ -280,6 +280,10 @@ def run():
     from dotenv import load_dotenv
     from password_reset.firebase import db
     from password_reset.utils.encryption import generate_ecc_keys, hybrid_encrypt, hybrid_decrypt
+    import sys
+
+    print("🚀 Starting key rotation script...", flush=True)
+
 
     load_dotenv()
 
@@ -288,9 +292,10 @@ def run():
 
     try:
         config_doc = config_ref.get()
+        print("First try block works!", flush=True)
     except Exception as e:
-        print("🔥 Firestore unavailable. Skipping key rotation.")
-        print(traceback.format_exc())
+        print("🔥 Firestore unavailable. Skipping key rotation.", flush=True)
+        print(traceback.format_exc(), flush=True)
         return
 
     old_private_key = os.getenv("ENCRYPTION_PRIVATE_KEY")
@@ -298,9 +303,9 @@ def run():
     is_first_time = old_private_key is None or old_public_key is None
 
     if is_first_time:
-        print("🆕 No keys in env. Encrypting docs for the first time...")
+        print("🆕 No keys in env. Encrypting docs for the first time...", flush=True)
     else:
-        print("🔁 Rotating keys for all encrypted documents...")
+        print("🔁 Rotating keys for all encrypted documents...", flush=True)
 
     new_private_key, new_public_key = generate_ecc_keys()
     docs = db.collection("users").stream()
@@ -315,7 +320,8 @@ def run():
                     for key, value in doc_data.items()
                 }
                 doc.reference.set(encrypted_fields)
-                print(f"✅ Encrypted (first time): {doc.id}")
+                print(f"✅ Encrypted (first time): {doc.id}", flush=True)
+                print("second try block works!", flush=True)
             else:
                 decrypted_fields = {}
                 for key, encrypted_field in doc_data.items():
@@ -323,7 +329,7 @@ def run():
                         decrypted = hybrid_decrypt(old_private_key, encrypted_field)
                         decrypted_fields[key] = list(decrypted.values())[0]
                     except Exception as e:
-                        print(f"❌ Decryption failed for field '{key}' in doc {doc.id}: {e}")
+                        print(f"❌ Decryption failed for field '{key}' in doc {doc.id}: {e}", flush=True)
                         raise
 
                 re_encrypted_fields = {
@@ -335,20 +341,20 @@ def run():
                 print(f"✅ Re-encrypted: {doc.id}")
 
         except Exception as e:
-            print(f"❌ Failed to process doc {doc.id}: {e}")
+            print(f"❌ Failed to process doc {doc.id}: {e}", flush=True)
             print(traceback.format_exc())
 
     try:
         config_ref.set({"last_rotation": now})
-        print("🧠 Saved new rotation timestamp in Firestore.")
+        print("🧠 Saved new rotation timestamp in Firestore.", flush=True)
     except Exception as e:
-        print(f"⚠️ Failed to save timestamp in Firestore: {e}")
+        print(f"⚠️ Failed to save timestamp in Firestore: {e}", flush=True)
 
     try:
         auto_update_env_on_railway(new_private_key, new_public_key)
     except Exception as e:
-        print("❌ Failed to auto-update Railway ENV vars:")
-        print(traceback.format_exc())
+        print("❌ Failed to auto-update Railway ENV vars:", flush=True)
+        print(traceback.format_exc(), flush=True)
 
 
 def auto_update_env_on_railway(new_private_key, new_public_key):
@@ -396,6 +402,6 @@ def auto_update_env_on_railway(new_private_key, new_public_key):
     }.items():
         res = requests.post(url, headers=headers, json=mutation(var_name, var_val))
         if res.status_code == 200:
-            print(f"✅ Updated {var_name} on Railway.")
+            print(f"✅ Updated {var_name} on Railway.", flush=True)
         else:
-            print(f"❌ Failed to update {var_name}: {res.text}")
+            print(f"❌ Failed to update {var_name}: {res.text}", flush=True)
