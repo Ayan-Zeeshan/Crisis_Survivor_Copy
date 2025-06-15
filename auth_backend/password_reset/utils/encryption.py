@@ -105,18 +105,7 @@ def get_master_public_key():
 def generate_ecc_keys():
     private_key = ec.generate_private_key(ec.SECP256R1())
     public_key = private_key.public_key()
-
-    # private_bytes = private_key.private_bytes(
-    #     encoding=serialization.Encoding.PEM,
-    #     format=serialization.PrivateFormat.PKCS8,
-    #     encryption_algorithm=serialization.NoEncryption()
-    # )
-    # public_bytes = public_key.public_bytes(
-    #     encoding=serialization.Encoding.PEM,
-    #     format=serialization.PublicFormat.SubjectPublicKeyInfo
-    # )
     return private_key, public_key
-    # return private_bytes.decode(), public_bytes.decode()
 
 def generate_aes_key():
     return os.urandom(32)

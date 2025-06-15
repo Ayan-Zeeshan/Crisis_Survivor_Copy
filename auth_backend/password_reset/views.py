@@ -280,3 +280,144 @@ def rotate_keys_view(request):
             "public": new_public_key
         }
     })
+
+# from django.http import JsonResponse
+# from django.views.decorators.csrf import csrf_exempt
+# from firebase_admin import firestore
+# import json
+# import os
+
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.backends import default_backend
+
+from password_reset.utils.encryption import *
+@csrf_exempt
+def send_data(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Only POST allowed"}, status=405)
+
+    try:
+        body = json.loads(request.body)
+
+        uid = body.get("uid")  # Don't encrypt UID
+        if not uid:
+            return JsonResponse({"error": "Missing uid"}, status=400)
+
+        # Load encrypted ECC key from Firestore
+        config_ref = db.collection("config").document("encryption_metadata")
+        config_doc = config_ref.get()
+        config_data = config_doc.to_dict()
+
+        encrypted_ecc_key = config_data["encrypted_ecc_key"]
+        encrypted_aes_key = config_data["encrypted_aes_key"]
+
+        # Decrypt ECC private key using master ECC private key
+        master_ecc_key_pem = os.getenv("MASTER_ECC_PRIVATE_KEY")
+        master_private_key = serialization.load_pem_private_key(
+            master_ecc_key_pem.encode(),
+            password=None,
+            backend=default_backend()
+        )
+        master_private_key_pem_str = master_private_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption()
+        ).decode()
+
+        ecc_private_pem = hybrid_decrypt(master_private_key_pem_str, encrypted_ecc_key)["ecc_key"]
+
+        ecc_private_key = serialization.load_pem_private_key(
+            ecc_private_pem.encode(),
+            password=None,
+            backend=default_backend()
+        )
+        ecc_private_pem_str = ecc_private_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption()
+        ).decode()
+
+        aes_hex = hybrid_decrypt(ecc_private_pem_str, encrypted_aes_key)["aes_key"]
+        aes_key = bytes.fromhex(aes_hex)
+
+        encrypted_data = {}
+        for k, v in body.items():
+            if k == "uid":  # Don't encrypt UID
+                continue
+            encrypted_data[k] = aes_encrypt(aes_key, v)
+
+        db.collection("users").document(uid).set(encrypted_data)
+
+        return JsonResponse({"success": True})
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+def receive_data(request):
+    try:
+        email = request.GET.get("email")
+        if not email:
+            return JsonResponse({"error": "Email query param required"}, status=400)
+
+        # Search user by email field
+        users_ref = db.collection("users")
+        query = users_ref.where("email", "==", aes_encrypt(b"temp_key", email)).stream()
+        doc = None
+        for d in query:
+            doc = d
+            break
+
+        if not doc:
+            return JsonResponse({"error": "User not found"}, status=404)
+
+        doc_data = doc.to_dict()
+
+        # Load encrypted ECC key from Firestore
+        config_ref = db.collection("config").document("encryption_metadata")
+        config_doc = config_ref.get()
+        config_data = config_doc.to_dict()
+
+        encrypted_ecc_key = config_data["encrypted_ecc_key"]
+        encrypted_aes_key = config_data["encrypted_aes_key"]
+
+        # Decrypt ECC private key using master ECC private key
+        master_ecc_key_pem = os.getenv("MASTER_ECC_PRIVATE_KEY")
+        master_private_key = serialization.load_pem_private_key(
+            master_ecc_key_pem.encode(),
+            password=None,
+            backend=default_backend()
+        )
+        master_private_key_pem_str = master_private_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption()
+        ).decode()
+
+        ecc_private_pem = hybrid_decrypt(master_private_key_pem_str, encrypted_ecc_key)["ecc_key"]
+
+        ecc_private_key = serialization.load_pem_private_key(
+            ecc_private_pem.encode(),
+            password=None,
+            backend=default_backend()
+        )
+        ecc_private_pem_str = ecc_private_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption()
+        ).decode()
+
+        aes_hex = hybrid_decrypt(ecc_private_pem_str, encrypted_aes_key)["aes_key"]
+        aes_key = bytes.fromhex(aes_hex)
+
+        decrypted_data = {}
+        for k, v in doc_data.items():
+            if v is None:
+                decrypted_data[k] = None
+            else:
+                decrypted_data[k] = aes_decrypt(aes_key, v)
+
+        return JsonResponse({"data": decrypted_data})
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
