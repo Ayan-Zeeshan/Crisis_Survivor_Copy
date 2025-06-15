@@ -17,7 +17,10 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
 
 # Init Firebase DB
-db = firestore.client()
+db = firestore.client() 
+
+def health(request):
+    return JsonResponse({"status": "OK"}) 
 
 @csrf_exempt
 def check_email_exists(request, provider=None):
