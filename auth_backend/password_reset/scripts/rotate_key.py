@@ -118,7 +118,13 @@ def run():
         new_aes_key = generate_aes_key()
         new_ecc_private_key, new_ecc_public_key = generate_ecc_keys()
 
-        new_encrypted_aes_key = hybrid_encrypt(new_ecc_public_key, {"aes_key": new_aes_key.hex()})
+        new_ecc_public_pem = new_ecc_public_key.public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo
+    ).decode()
+
+        new_encrypted_aes_key = hybrid_encrypt(new_ecc_public_pem, {"aes_key": new_aes_key.hex()})
+
         new_master_public_pem = master_private_key.public_key().public_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PublicFormat.SubjectPublicKeyInfo).decode()
