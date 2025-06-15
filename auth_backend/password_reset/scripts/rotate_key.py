@@ -1,4 +1,3 @@
-
 # def run():
 #     import os
 #     import datetime
@@ -64,9 +63,33 @@
 #         }.items():
 #             res = requests.post(url, headers=headers, json=mutation(var_name, var_val))
 #             if res.status_code == 200:
-#                 print(f"✅ Updated {var_name} on Railway.", flush=True)
+#                 print(f"✅ Updated {var_name} and {var_val} on Railway.", flush=True)
 #             else:
 #                 print(f"❌ Failed to update {var_name}: {res.text}", flush=True)
+
+#         # ✅ Trigger redeployment to apply updated env vars
+#         redeploy_mutation = {
+#             "query": """
+#             mutation DeployEnvironment($input: DeployEnvironmentInput!) {
+#                 deployEnvironment(input: $input) {
+#                     id
+#                 }
+#             }
+#             """,
+#             "variables": {
+#                 "input": {
+#                     "environmentId": ENV_ID,
+#                     "projectId": PROJECT_ID
+#                 }
+#             }
+#         }
+
+#         print("🔁 Triggering self-redeploy to apply new ENV vars...", flush=True)
+#         res = requests.post(url, headers=headers, json=redeploy_mutation)
+#         if res.status_code == 200:
+#             print("✅ Redeployment triggered successfully.", flush=True)
+#         else:
+#             print(f"❌ Failed to trigger redeployment: {res.text}", flush=True)
 
 #     try:
 #         config_doc = config_ref.get()
@@ -85,7 +108,7 @@
 #     is_first_time = not old_private_key_raw.strip() or not old_public_key_raw.strip()
 
 #     if old_private_key_raw:
-#         fixed_key = old_private_key_raw.replace('\\n', '\n').encode()
+#         fixed_key = old_private_key_raw.encode('utf-8').decode('unicode_escape').encode('utf-8')
 #         old_private_key = serialization.load_pem_private_key(
 #             fixed_key,
 #             password=None,
@@ -231,6 +254,32 @@ def run():
             else:
                 print(f"❌ Failed to update {var_name}: {res.text}", flush=True)
 
+        # Redeploy the service to apply env var changes
+        try:
+            print("🔁 Triggering self-redeploy to apply new env vars...", flush=True)
+            redeploy_mutation = {
+                "query": """
+                mutation DeployEnvironment($input: DeployEnvironmentInput!) {
+                    deployEnvironment(input: $input) {
+                        id
+                    }
+                }
+                """,
+                "variables": {
+                    "input": {
+                        "environmentId": ENV_ID,
+                        "projectId": PROJECT_ID
+                    }
+                }
+            }
+            r = requests.post("https://gql.railway.app/graphql", headers=headers, json=redeploy_mutation)
+            if r.status_code == 200:
+                print("✅ Redeployment triggered successfully.", flush=True)
+            else:
+                print("❌ Failed to trigger redeployment:", r.text, flush=True)
+        except Exception as e:
+            print("❌ Exception during redeploy trigger:", e, flush=True)
+
     try:
         config_doc = config_ref.get()
         print("First try block works!", flush=True)
@@ -281,7 +330,7 @@ def run():
                     if value is None:
                         encrypted_fields[key] = None
                     else:
-                        encrypted_fields[key] = hybrid_encrypt(new_public_key, {key: value})
+                        encrypted_fields[key] = hybrid_encrypt(new_public_key, {"value": value})
                 doc.reference.set(encrypted_fields)
                 print(f"✅ Encrypted (first time): {doc.id}", flush=True)
             else:
@@ -292,7 +341,7 @@ def run():
                         continue
                     try:
                         decrypted = hybrid_decrypt(old_private_key, encrypted_field)
-                        decrypted_fields[key] = list(decrypted.values())[0]
+                        decrypted_fields[key] = decrypted["value"]
                     except Exception as e:
                         print(f"❌ Decryption failed for field '{key}' in doc {doc.id}: {e}", flush=True)
                         raise
@@ -302,7 +351,7 @@ def run():
                     if value is None:
                         re_encrypted_fields[key] = None
                     else:
-                        re_encrypted_fields[key] = hybrid_encrypt(new_public_key, {key: value})
+                        re_encrypted_fields[key] = hybrid_encrypt(new_public_key, {"value": value})
 
                 doc.reference.set(re_encrypted_fields)
                 print(f"✅ Re-encrypted: {doc.id}", flush=True)
