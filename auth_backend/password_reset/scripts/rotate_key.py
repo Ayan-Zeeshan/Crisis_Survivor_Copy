@@ -1,3 +1,4 @@
+
 # def run():
 #     import os
 #     import datetime
@@ -84,11 +85,9 @@
 #     is_first_time = not old_private_key_raw.strip() or not old_public_key_raw.strip()
 
 #     if old_private_key_raw:
-#         if isinstance(old_private_key_raw, str):
-#             old_private_key_raw = old_private_key_raw.encode()
-
+#         fixed_key = old_private_key_raw.replace('\\n', '\n').encode()
 #         old_private_key = serialization.load_pem_private_key(
-#             old_private_key_raw,
+#             fixed_key,
 #             password=None,
 #             backend=default_backend()
 #         )
@@ -249,7 +248,7 @@ def run():
     is_first_time = not old_private_key_raw.strip() or not old_public_key_raw.strip()
 
     if old_private_key_raw:
-        fixed_key = old_private_key_raw.replace('\\n', '\n').encode()
+        fixed_key = old_private_key_raw.encode('utf-8').decode('unicode_escape').encode('utf-8')
         old_private_key = serialization.load_pem_private_key(
             fixed_key,
             password=None,
