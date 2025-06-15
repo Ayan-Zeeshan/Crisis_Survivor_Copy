@@ -2,7 +2,7 @@
 
 from django.core.management.base import BaseCommand
 from password_reset.firebase import db  # now works without path hacks
-from password_reset.utils.encryption import generate_key_pair, encrypt_data, decrypt_data  # or whatever you use
+from password_reset.utils.encryption import generate_ecc_keys, hybrid_encrypt, hybrid_decrypt
 
 class Command(BaseCommand):
     help = "Rotates encryption keys and re-encrypts Firestore data"
