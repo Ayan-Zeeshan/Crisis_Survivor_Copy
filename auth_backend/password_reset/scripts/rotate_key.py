@@ -105,7 +105,14 @@ def run():
         )
 
         encrypted_aes_key = config_data["encrypted_aes_key"]
-        decrypted_aes_hex = hybrid_decrypt(ecc_private_key, encrypted_aes_key)["aes_key"]
+        ecc_private_key_pem_str = ecc_private_key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=serialization.NoEncryption()
+    ).decode()
+
+        decrypted_aes_hex = hybrid_decrypt(ecc_private_key_pem_str, encrypted_aes_key)["aes_key"]
+
         old_aes_key = bytes.fromhex(decrypted_aes_hex)
 
         new_aes_key = generate_aes_key()
