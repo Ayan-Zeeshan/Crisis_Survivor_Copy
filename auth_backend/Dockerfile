@@ -9,6 +9,7 @@ COPY . /app
 
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
+RUN find /app -type f
 
 # Run migrations and then start the server
-CMD ["sh", "-c", "RUN find /app -type f && python rotate.py && python manage.py makemigrations && python manage.py migrate && python run_waitress.py "]
+CMD ["sh", "-c", "python rotate.py && python manage.py makemigrations && python manage.py migrate && python run_waitress.py "]
