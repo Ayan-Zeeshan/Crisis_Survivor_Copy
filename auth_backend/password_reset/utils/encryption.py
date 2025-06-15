@@ -1,10 +1,23 @@
-# import os
+# import os 
 # import base64
 # import json
 # from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 # from cryptography.hazmat.primitives.asymmetric import ec
 # from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 # from cryptography.hazmat.primitives import hashes, serialization
+# from dotenv import load_dotenv
+
+# load_dotenv()
+
+# # Load master ECC private key from .env
+# MASTER_ECC_PRIVATE_KEY_PEM = os.getenv("MASTER_ECC_PRIVATE_KEY").encode()
+# MASTER_ECC_PRIVATE_KEY = serialization.load_pem_private_key(
+#     MASTER_ECC_PRIVATE_KEY_PEM,
+#     password=None
+# )
+
+# def get_master_public_key():
+#     return MASTER_ECC_PRIVATE_KEY.public_key()
 
 # def generate_ecc_keys():
 #     private_key = ec.generate_private_key(ec.SECP256R1())
@@ -104,6 +117,23 @@ def generate_ecc_keys():
     )
 
     return private_bytes.decode(), public_bytes.decode()
+
+def generate_aes_key():
+    return os.urandom(32)
+
+def aes_encrypt(key, plaintext):
+    aesgcm = AESGCM(key)
+    nonce = os.urandom(12)
+    ciphertext = aesgcm.encrypt(nonce, str(plaintext).encode(), None)
+    return base64.b64encode(nonce + ciphertext).decode()
+
+def aes_decrypt(key, encrypted_data):
+    data = base64.b64decode(encrypted_data)
+    nonce = data[:12]
+    ciphertext = data[12:]
+    aesgcm = AESGCM(key)
+    plaintext = aesgcm.decrypt(nonce, ciphertext, None)
+    return plaintext.decode()
 
 def hybrid_encrypt(public_key_pem, plaintext_dict):
     public_key = serialization.load_pem_public_key(public_key_pem.encode())
