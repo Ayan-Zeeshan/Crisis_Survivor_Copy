@@ -90,7 +90,14 @@ def run():
     else:
         print("🔁 Rotating encryption keys...", flush=True)
 
-        decrypted_ecc_key_pem = hybrid_decrypt(master_private_key, encrypted_ecc_key)["ecc_key"].encode()
+        master_private_key_pem_str = master_private_key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=serialization.NoEncryption()
+    ).decode()
+
+        decrypted_ecc_key_pem = hybrid_decrypt(master_private_key_pem_str, encrypted_ecc_key)["ecc_key"].encode()
+
         ecc_private_key = serialization.load_pem_private_key(
             decrypted_ecc_key_pem,
             password=None,
