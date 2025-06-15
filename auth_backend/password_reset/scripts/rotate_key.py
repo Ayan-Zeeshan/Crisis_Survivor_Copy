@@ -278,8 +278,8 @@ def run():
     import traceback
     import requests
     from dotenv import load_dotenv
-    from password_reset.firebase import db
-    from password_reset.utils.encryption import generate_ecc_keys, hybrid_encrypt, hybrid_decrypt
+    from app.password_reset.firebase import db
+    from app.password_reset.utils.encryption import generate_ecc_keys, hybrid_encrypt, hybrid_decrypt
     import sys
 
     print("🚀 Starting key rotation script...", flush=True)
