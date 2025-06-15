@@ -1,3 +1,4 @@
+echo "🚀 Entrypoint: Starting the app..."
 set -e
 
 # echo "Applying database migrations..."
