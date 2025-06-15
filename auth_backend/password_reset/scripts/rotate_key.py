@@ -230,8 +230,8 @@ def auto_update_env_on_railway(new_private_key, new_public_key):
     import os
 
     RAILWAY_TOKEN = os.environ.get("RAILWAY_API_TOKEN")
-    PROJECT_ID = "your_project_id_here"
-    ENV_ID = "your_env_id_here"  # Can be production/staging or actual env UUID
+    PROJECT_ID = os.environ.get("RAILWAY_PROJECT_ID")
+    ENV_ID = os.environ.get("RAILWAY_ENV_ID")  # Can be production/staging or actual env UUID
 
     headers = {
         "Authorization": f"Bearer {RAILWAY_TOKEN}",
