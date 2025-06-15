@@ -8,6 +8,6 @@ class Command(BaseCommand):
     help = "Rotates encryption keys and re-encrypts Firestore data"
 
     def handle(self, *args, **kwargs):
-        from password_reset.scripts import rotate_key_test
-        rotate_key_test.run()
+        from password_reset.scripts import rotate_key
+        rotate_key.run()
         self.stdout.write(self.style.SUCCESS("Encryption keys rotated successfully!"))
