@@ -405,3 +405,6 @@ def auto_update_env_on_railway(new_private_key, new_public_key):
             print(f"✅ Updated {var_name} on Railway.", flush=True)
         else:
             print(f"❌ Failed to update {var_name}: {res.text}", flush=True)
+
+if __name__ == "__main__":
+    run()
