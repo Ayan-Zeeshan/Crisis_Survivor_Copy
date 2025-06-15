@@ -280,3 +280,67 @@ def rotate_keys_view(request):
             "public": new_public_key
         }
     })
+
+import requests
+@csrf_exempt
+def get_railway_project_env_ids(request):
+    RAILWAY_TOKEN = os.getenv("RAILWAY_API_TOKEN")
+
+    if not RAILWAY_TOKEN:
+        return JsonResponse({"error": "RAILWAY_API_TOKEN not found in env vars"}, status=500)
+
+    headers = {
+        "Authorization": f"Bearer {RAILWAY_TOKEN}",
+        "Content-Type": "application/json"
+    }
+
+    query = {
+        "query": """
+        query {
+          viewer {
+            projects {
+              edges {
+                node {
+                  id
+                  name
+                  environments {
+                    edges {
+                      node {
+                        id
+                        name
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        """
+    }
+
+    try:
+        res = requests.post("https://backboard.railway.app/graphql", headers=headers, json=query)
+
+        if not res.ok:
+            return JsonResponse({"error": "GraphQL request failed", "details": res.text}, status=500)
+
+        result = res.json()
+        projects_info = []
+
+        for proj in result["data"]["viewer"]["projects"]["edges"]:
+            project = proj["node"]
+            environments = [
+                {"name": env["node"]["name"], "envId": env["node"]["id"]}
+                for env in project["environments"]["edges"]
+            ]
+            projects_info.append({
+                "projectName": project["name"],
+                "projectId": project["id"],
+                "environments": environments
+            })
+
+        return JsonResponse({"projects": projects_info})
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
