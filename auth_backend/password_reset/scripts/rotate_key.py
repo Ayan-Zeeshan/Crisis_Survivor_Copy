@@ -52,6 +52,8 @@ def run():
                     }
                 }
             }
+        print("Private Key:", new_private_key, flush=True)
+        print("Public Key:", new_public_key, flush=True)
 
         for var_name, var_val in {
             "ENCRYPTION_PRIVATE_KEY": new_private_key,
