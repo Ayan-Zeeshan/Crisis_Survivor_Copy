@@ -114,7 +114,7 @@ import 'dart:async';
 import 'dart:convert';
 // import 'dart:developer';
 import 'package:crisis_survivor/Admin/adminPage.dart';
-import 'package:crisis_survivor/Donee/victimscreen.dart';
+import 'package:crisis_survivor/Victim/victimScreen.dart';
 import 'package:crisis_survivor/Donor/donorscreen.dart';
 import 'package:crisis_survivor/Screens/Roles.dart';
 import 'package:crisis_survivor/Screens/roleBasedNavigation.dart';

@@ -72,7 +72,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'password_reset'
+    'password_reset',
+    'django_extensions',
 ]
 STATIC_URL = '/api/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Folder for collected static files

@@ -214,7 +214,7 @@ class _Sign_UpState extends State<Sign_Up> {
     final dataList = {
       "username": _myController.text,
       "email": _myController2.text,
-      "role": "donee",
+      "role": null,
       "time": DateTime.now().toString(),
     };
 
@@ -256,7 +256,7 @@ class _Sign_UpState extends State<Sign_Up> {
         final userData = {
           'username': username,
           'email': email,
-          'role': 'donee',
+          'role': null,
           'time': DateTime.now().toString(),
         };
 

@@ -1,8 +1,8 @@
 // ignore_for_file: file_names, no_leading_underscores_for_local_identifiers, avoid_print, use_build_context_synchronously
 
 import 'dart:convert';
-import 'package:crisis_survivor/Admin/adminPage.dart';
-import 'package:crisis_survivor/Donee/victimscreen.dart';
+import 'package:crisis_survivor/Consultant/consultantscreen.dart';
+import 'package:crisis_survivor/Victim/victimScreen.dart';
 import 'package:crisis_survivor/Donor/donorscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -36,10 +36,10 @@ class _RolesState extends State<Roles> {
 
       print("Cache updated: $userDetails");
       switch (newRole) {
-        case 'admin':
+        case 'consultant':
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => Admin()),
+            MaterialPageRoute(builder: (context) => ConsultantScreen()),
           );
         case 'donor':
           Navigator.pushReplacement(
@@ -52,7 +52,16 @@ class _RolesState extends State<Roles> {
             MaterialPageRoute(builder: (context) => victimScreen()),
           );
         default:
-          return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Failed to Select Role"),
+              duration: Duration(seconds: 3),
+            ),
+          );
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => Roles()),
+          );
       }
     } else {
       print("No cache found to update.");
@@ -182,9 +191,10 @@ class _RolesState extends State<Roles> {
           // ),
           // ),
           SizedBox(height: (width / 69.55)),
+          GestureDetector(onTap: () {}, child: Image.asset("assets/Donor.png")),
           ElevatedButton(
             onPressed: () {
-              updateUserRoleInCache('donee');
+              updateUserRoleInCache('donor');
             },
             child: Text("Update"),
           ),

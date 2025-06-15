@@ -1,6 +1,6 @@
 // ignore_for_file: file_names, use_build_context_synchronously
 import 'package:crisis_survivor/Admin/adminPage.dart';
-import 'package:crisis_survivor/Donee/victimscreen.dart';
+import 'package:crisis_survivor/Victim/victimScreen.dart';
 import 'package:crisis_survivor/Donor/donorscreen.dart';
 import 'package:crisis_survivor/Screens/Roles.dart';
 import 'package:crisis_survivor/auth_guard.dart';

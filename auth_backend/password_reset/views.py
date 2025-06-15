@@ -7,6 +7,12 @@ from .redis_client import redis  # ✅ Use shared redis instance
 from django.views.decorators.csrf import csrf_exempt
 import os
 import json
+from django.conf import settings
+from dotenv import load_dotenv
+import firebase_admin
+from firebase_admin import credentials, firestore
+from password_reset.utils.encryption import generate_ecc_keys, hybrid_encrypt, hybrid_decrypt
+
 
 @csrf_exempt
 def check_email_exists(request, provider=None):
@@ -182,3 +188,85 @@ def delete_user(request):
 
     except Exception as e:
         return JsonResponse({'error': 'Server error', 'details': str(e)}, status=500)
+
+
+
+@csrf_exempt
+def secure_save_user(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Invalid method'}, status=405)
+
+    try:
+        data = json.loads(request.body)
+
+        payload = {
+            "username": data.get("username"),
+            "email": data.get("email"),
+            "role": data.get("role", ""),  # allow optional
+            "time": data.get("time")
+        }
+
+        # Encrypt with public key stored in env var
+        public_key = os.environ['ENCRYPTION_PUBLIC_KEY']
+        encrypted_data = hybrid_encrypt(public_key, payload)
+
+        db.collection("users").add(encrypted_data)
+
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
+def rotate_keys_view(request):
+    if request.method != 'POST':
+        return JsonResponse({"error": "Only POST allowed"}, status=405)
+
+    load_dotenv()
+
+    if not firebase_admin._apps:
+        cred = credentials.Certificate({
+            "type": "service_account",
+            "project_id": os.getenv("FIREBASE_PROJECT_ID"),
+            "private_key_id": os.getenv("FIREBASE_PRIVATE_KEY_ID"),
+            "private_key": os.getenv("FIREBASE_PRIVATE_KEY").replace('\\n', '\n'),
+            "client_email": os.getenv("FIREBASE_CLIENT_EMAIL"),
+            "client_id": os.getenv("FIREBASE_CLIENT_ID"),
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "auth_provider_x509_cert_url": "https://www.googleapis.com/v1/certs",
+            "client_x509_cert_url": os.getenv("FIREBASE_CLIENT_CERT_URL")
+        })
+        firebase_admin.initialize_app(cred)
+
+    db = firestore.client()
+    old_private_key = os.getenv("ENCRYPTION_PRIVATE_KEY")
+    new_private_key, new_public_key = generate_ecc_keys()
+
+    docs = db.collection("users").stream()
+    success_count = 0
+    failed_count = 0
+    failed_docs = []
+
+    for doc in docs:
+        try:
+            doc_data = doc.to_dict()
+            decrypted = hybrid_decrypt(old_private_key, doc_data)
+            re_encrypted = hybrid_encrypt(new_public_key, decrypted)
+            doc.reference.set(re_encrypted)
+            success_count += 1
+        except Exception as e:
+            failed_count += 1
+            failed_docs.append({"id": doc.id, "error": str(e)})
+
+    print("→ ENCRYPTION_PRIVATE_KEY=\n" + new_private_key)
+    print("→ ENCRYPTION_PUBLIC_KEY=\n" + new_public_key)
+
+    return JsonResponse({
+        "message": "Key rotation complete",
+        "successfully_rotated": success_count,
+        "failed_docs": failed_docs[:3],  # just a preview
+        "new_keys": {
+            "private": new_private_key,
+            "public": new_public_key
+        }
+    })

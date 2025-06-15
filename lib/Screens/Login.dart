@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crisis_survivor/Admin/adminPage.dart';
-import 'package:crisis_survivor/Donee/victimscreen.dart';
+import 'package:crisis_survivor/Victim/victimScreen.dart';
 import 'package:crisis_survivor/Donor/donorscreen.dart';
 import 'package:crisis_survivor/Screens/ForgotPassword.dart';
 import 'package:crisis_survivor/Screens/Roles.dart';

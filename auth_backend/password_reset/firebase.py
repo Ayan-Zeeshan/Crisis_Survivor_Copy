@@ -20,6 +20,10 @@ if not firebase_admin._apps:
         "client_x509_cert_url": os.getenv("FIREBASE_CLIENT_CERT_URL")
     })
     firebase_admin.initialize_app(cred)
+
+# cred = credentials.Certificate("crisis-survivor-firebase-adminsdk-fbsvc-87aa3ee0c5.json")
+# firebase_admin.initialize_app(cred)
+# db = firestore.client()
     
 # ✅ Export Firestore client
 db = firestore.client()
