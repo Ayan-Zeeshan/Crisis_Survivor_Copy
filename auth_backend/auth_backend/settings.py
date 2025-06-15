@@ -58,7 +58,7 @@ X_FRAME_OPTIONS = 'DENY'
 ALLOWED_HOSTS = [
     'authbackend-production-ed7f.up.railway.app',
     'localhost',
-    '127.0.0.1'
+    '127.0.0.1', "0.0.0.0", ".railway.app"
 ]
 
 
