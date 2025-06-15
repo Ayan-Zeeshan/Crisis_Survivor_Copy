@@ -43,7 +43,15 @@ def run():
     if is_first_time:
         print("🆕 First-time setup. Generating keys and encrypting data...", flush=True)
 
-        ecc_private_key, ecc_public_key = generate_ecc_keys()
+        # ecc_private_key, ecc_public_key = generate_ecc_keys()
+        ecc_private_pem, ecc_public_key = generate_ecc_keys()
+        from cryptography.hazmat.primitives import serialization
+        ecc_private_key = serialization.load_pem_private_key(
+            ecc_private_pem.encode(),
+            password=None,
+            backend=default_backend()
+        )   
+
         aes_key = generate_aes_key()
 
         encrypted_aes_key = hybrid_encrypt(ecc_public_key, {"aes_key": aes_key.hex()})
