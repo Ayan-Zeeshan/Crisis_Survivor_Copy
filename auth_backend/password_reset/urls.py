@@ -7,5 +7,4 @@ urlpatterns = [
     path('check-email/', check_email_exists),
     path('delete-user/', delete_user),
     path("rotate-keys/", rotate_keys_view),
-    path("get-railway-ids/", get_railway_project_env_ids),
 ]
