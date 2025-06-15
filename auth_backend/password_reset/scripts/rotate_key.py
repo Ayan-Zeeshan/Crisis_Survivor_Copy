@@ -141,6 +141,27 @@ def run():
         docs = db.collection("users").stream()
         for doc in docs:
             doc_data = doc.to_dict()
+            print(f"🧊 Encrypted doc from Firestore ({doc.id}): {doc_data}", flush=True)
+
+            decrypted_fields = {}
+            for k, encrypted_val in doc_data.items():
+                if encrypted_val is None:
+                    decrypted_fields[k] = None
+                else:
+                    decrypted_fields[k] = aes_decrypt(old_aes_key, encrypted_val)
+            print(f"🔓 Decrypted fields: {decrypted_fields}", flush=True)
+
+            re_encrypted_fields = {}
+            for k, v in decrypted_fields.items():
+                if v is None:
+                    re_encrypted_fields[k] = None
+                else:
+                    re_encrypted_fields[k] = aes_encrypt(new_aes_key, v)
+            print(f"🔐 Re-encrypted fields: {re_encrypted_fields}", flush=True)
+
+            doc.reference.set(re_encrypted_fields)
+            print(f"🔄 Rotated doc: {doc.id}", flush=True)
+
             decrypted_fields = {}
             for k, encrypted_val in doc_data.items():
                 if encrypted_val is None:
