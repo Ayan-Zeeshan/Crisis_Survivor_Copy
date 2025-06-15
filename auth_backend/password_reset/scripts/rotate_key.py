@@ -297,52 +297,98 @@ def run():
     now = datetime.datetime.utcnow()
     config_ref = db.collection("config").document("encryption_metadata")
 
-    def auto_update_env_on_railway(new_private_key, new_public_key):
-        import requests
+    # def auto_update_env_on_railway(new_private_key, new_public_key):
+    #     import requests
+    #     import os
+
+    #     RAILWAY_TOKEN = os.environ.get("RAILWAY_API_TOKEN")
+    #     ENV_ID = os.environ.get("RAILWAY_ENVIRONMENT_ID")
+
+    #     if not all([RAILWAY_TOKEN, ENV_ID]):
+    #         raise Exception("RAILWAY_API_TOKEN or RAILWAY_ENVIRONMENT_ID is missing.")
+
+    #     headers = {
+    #         "Authorization": f"Bearer {RAILWAY_TOKEN}",
+    #         "Content-Type": "application/json"
+    #     }
+
+    #     url = "https://backboard.railway.app/graphql"
+
+    #     def mutation(name, value):
+    #         return {
+    #             "query": """
+    #             mutation UpsertVariable($input: UpsertVariableInput!) {
+    #                 upsertVariable(input: $input) {
+    #                     id
+    #                     name
+    #                     value
+    #                 }
+    #             }
+    #             """,
+    #             "variables": {
+    #                 "input": {
+    #                     "environmentId": ENV_ID,
+    #                     "name": name,
+    #                     "value": value.replace('\n', '\\n')
+    #                 }
+    #             }
+    #         }
+
+    #     for var_name, var_val in {
+    #         "ENCRYPTION_PRIVATE_KEY": new_private_key,
+    #         "ENCRYPTION_PUBLIC_KEY": new_public_key
+    #     }.items():
+    #         res = requests.post(url, headers=headers, json=mutation(var_name, var_val))
+    #         if res.status_code == 200:
+    #             print(f"✅ Updated {var_name} on Railway.", flush=True)
+    #         else:
+    #             print(f"❌ Failed to update {var_name}: {res.text}", flush=True)
+    def list_env_vars_on_railway():
         import os
+        import requests
 
         RAILWAY_TOKEN = os.environ.get("RAILWAY_API_TOKEN")
         ENV_ID = os.environ.get("RAILWAY_ENVIRONMENT_ID")
 
         if not all([RAILWAY_TOKEN, ENV_ID]):
-            raise Exception("RAILWAY_API_TOKEN or RAILWAY_ENVIRONMENT_ID is missing.")
+            raise Exception("Missing RAILWAY_API_TOKEN or RAILWAY_ENVIRONMENT_ID")
 
         headers = {
             "Authorization": f"Bearer {RAILWAY_TOKEN}",
             "Content-Type": "application/json"
         }
 
-        url = "https://backboard.railway.app/graphql"
-
-        def mutation(name, value):
-            return {
-                "query": """
-                mutation UpsertVariable($input: UpsertVariableInput!) {
-                    upsertVariable(input: $input) {
-                        id
-                        name
-                        value
-                    }
+        query = {
+            "query": """
+            query GetVariables($environmentId: String!) {
+            variables(environmentId: $environmentId) {
+                edges {
+                node {
+                    id
+                    name
+                    value
                 }
-                """,
-                "variables": {
-                    "input": {
-                        "environmentId": ENV_ID,
-                        "name": name,
-                        "value": value.replace('\n', '\\n')
-                    }
                 }
             }
+            }
+            """,
+            "variables": {
+                "environmentId": ENV_ID
+            }
+        }
 
-        for var_name, var_val in {
-            "ENCRYPTION_PRIVATE_KEY": new_private_key,
-            "ENCRYPTION_PUBLIC_KEY": new_public_key
-        }.items():
-            res = requests.post(url, headers=headers, json=mutation(var_name, var_val))
-            if res.status_code == 200:
-                print(f"✅ Updated {var_name} on Railway.", flush=True)
-            else:
-                print(f"❌ Failed to update {var_name}: {res.text}", flush=True)
+        response = requests.post("https://backboard.railway.app/graphql", headers=headers, json=query)
+        
+        if response.status_code == 200:
+            data = response.json()
+            vars = data.get("data", {}).get("variables", {}).get("edges", [])
+            print("🔍 Current environment variables:",flush=True)
+            for var in vars:
+                name = var["node"]["name"]
+                val = var["node"]["value"]
+                print(f" - {name} = {val[:10]}...",flush=True)  # show only first 10 chars for safety
+        else:
+            print(f"❌ Failed to fetch env vars: {response.text}",flush=True)
 
     try:
         config_doc = config_ref.get()
@@ -427,7 +473,8 @@ def run():
         print(f"⚠️ Failed to save timestamp in Firestore: {e}", flush=True)
 
     try:
-        auto_update_env_on_railway(new_private_key, new_public_key)
+        list_env_vars_on_railway()
+        # auto_update_env_on_railway(new_private_key, new_public_key)
     except Exception as e:
         print("❌ Failed to auto-update Railway ENV vars:", flush=True)
         print(traceback.format_exc(), flush=True)
