@@ -320,7 +320,7 @@ def get_railway_project_env_ids(request):
     }
 
     try:
-        res = requests.post("https://backboard.railway.app/graphql", headers=headers, json=query)
+        res = requests.post("https://railway-production.up.railway.app/graphql/v2", headers=headers, json=query)
 
         if not res.ok:
             return JsonResponse({"error": "GraphQL request failed", "details": res.text}, status=500)
