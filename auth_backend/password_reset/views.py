@@ -202,19 +202,22 @@ def secure_save_user(request):
         payload = {
             "username": data.get("username"),
             "email": data.get("email"),
-            "role": data.get("role", ""),  # allow optional
+            "role": data.get("role", ""),  # optional
             "time": data.get("time")
         }
 
-        # Encrypt with public key stored in env var
         public_key = os.environ['ENCRYPTION_PUBLIC_KEY']
-        encrypted_data = hybrid_encrypt(public_key, payload)
 
-        db.collection("users").add(encrypted_data)
+        encrypted_fields = {}
+        for key, value in payload.items():
+            encrypted_fields[key] = hybrid_encrypt(public_key, {key: value})
+
+        db.collection("users").add(encrypted_fields)
 
         return JsonResponse({'success': True})
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
 
 @csrf_exempt
 def rotate_keys_view(request):
@@ -244,18 +247,25 @@ def rotate_keys_view(request):
 
     docs = db.collection("users").stream()
     success_count = 0
-    failed_count = 0
     failed_docs = []
 
     for doc in docs:
         try:
             doc_data = doc.to_dict()
-            decrypted = hybrid_decrypt(old_private_key, doc_data)
-            re_encrypted = hybrid_encrypt(new_public_key, decrypted)
-            doc.reference.set(re_encrypted)
+            decrypted_fields = {}
+
+            for key, encrypted_field in doc_data.items():
+                decrypted = hybrid_decrypt(old_private_key, encrypted_field)
+                decrypted_fields[key] = list(decrypted.values())[0]  # Get just the value
+
+            new_encrypted_fields = {}
+            for key, value in decrypted_fields.items():
+                new_encrypted_fields[key] = hybrid_encrypt(new_public_key, {key: value})
+
+            doc.reference.set(new_encrypted_fields)
             success_count += 1
+
         except Exception as e:
-            failed_count += 1
             failed_docs.append({"id": doc.id, "error": str(e)})
 
     print("→ ENCRYPTION_PRIVATE_KEY=\n" + new_private_key)
@@ -264,7 +274,7 @@ def rotate_keys_view(request):
     return JsonResponse({
         "message": "Key rotation complete",
         "successfully_rotated": success_count,
-        "failed_docs": failed_docs[:3],  # just a preview
+        "failed_docs": failed_docs[:3],
         "new_keys": {
             "private": new_private_key,
             "public": new_public_key

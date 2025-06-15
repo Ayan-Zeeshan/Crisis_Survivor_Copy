@@ -16,9 +16,7 @@ def run():
     else:
         print("🔁 Rotating keys for all documents...")
 
-    # Generate new keypair
     new_private_key, new_public_key = generate_ecc_keys()
-
     docs = db.collection("users").stream()
 
     for doc in docs:
@@ -26,21 +24,27 @@ def run():
             doc_data = doc.to_dict()
 
             if is_first_time:
-                # First-time encryption
-                encrypted = hybrid_encrypt(new_public_key, doc_data)
-                doc.reference.set(encrypted)
+                encrypted_fields = {}
+                for key, value in doc_data.items():
+                    encrypted_fields[key] = hybrid_encrypt(new_public_key, {key: value})
+                doc.reference.set(encrypted_fields)
                 print(f"✅ Encrypted doc for first time: {doc.id}")
-            else:
-                # Decrypt with old key
-                try:
-                    decrypted = hybrid_decrypt(old_private_key, doc_data)
-                except Exception as decrypt_error:
-                    print(f"❌ Could not decrypt doc {doc.id}: {decrypt_error}")
-                    continue
 
-                # Re-encrypt with new key
-                re_encrypted = hybrid_encrypt(new_public_key, decrypted)
-                doc.reference.set(re_encrypted)
+            else:
+                decrypted_fields = {}
+                for key, encrypted_field in doc_data.items():
+                    try:
+                        decrypted = hybrid_decrypt(old_private_key, encrypted_field)
+                        decrypted_fields[key] = list(decrypted.values())[0]
+                    except Exception as e:
+                        print(f"❌ Failed to decrypt field '{key}' in doc {doc.id}: {e}")
+                        raise
+
+                re_encrypted_fields = {}
+                for key, value in decrypted_fields.items():
+                    re_encrypted_fields[key] = hybrid_encrypt(new_public_key, {key: value})
+
+                doc.reference.set(re_encrypted_fields)
                 print(f"✅ Re-encrypted doc: {doc.id}")
 
         except Exception as e:
