@@ -354,6 +354,10 @@ def run():
 
     old_private_key_raw = os.getenv("ENCRYPTION_PRIVATE_KEY", "")
     old_public_key_raw = os.getenv("ENCRYPTION_PUBLIC_KEY", "")
+    print("✅ Project ID:", os.environ.get("RAILWAY_PROJECT_ID"),flush=True)
+    print("✅ Env ID:", os.environ.get("RAILWAY_ENVIRONMENT_ID"),flush=True)
+    print("✅ Token Exists:", bool(os.environ.get("RAILWAY_API_TOKEN")),flush=True)
+
     is_first_time = not old_private_key_raw.strip() or not old_public_key_raw.strip()
 
     old_private_key = fix_pem_format(old_private_key_raw)
