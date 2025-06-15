@@ -12,9 +12,6 @@
 
 #     load_dotenv()
 
-#     # def fix_pem_format(pem_str):
-#     #     return pem_str.replace('\\n', '\n').encode() if pem_str else None
-
 #     now = datetime.datetime.utcnow()
 #     config_ref = db.collection("config").document("encryption_metadata")
 
@@ -56,6 +53,7 @@
 #                     }
 #                 }
 #             }
+
 #         print("Private Key:", new_private_key, flush=True)
 #         print("Public Key:", new_public_key, flush=True)
 
@@ -68,52 +66,6 @@
 #                 print(f"✅ Updated {var_name} on Railway.", flush=True)
 #             else:
 #                 print(f"❌ Failed to update {var_name}: {res.text}", flush=True)
-#     # def list_env_vars_on_railway():
-#     #     import os
-#     #     import requests
-
-#     #     RAILWAY_TOKEN = os.environ.get("RAILWAY_API_TOKEN")
-#     #     ENV_ID = os.environ.get("RAILWAY_ENVIRONMENT_ID")
-
-#     #     if not all([RAILWAY_TOKEN, ENV_ID]):
-#     #         raise Exception("Missing RAILWAY_API_TOKEN or RAILWAY_ENVIRONMENT_ID")
-
-#     #     headers = {
-#     #         "Authorization": f"Bearer {RAILWAY_TOKEN}",
-#     #         "Content-Type": "application/json"
-#     #     }
-
-#     #     query = {
-#     #         "query": """
-#     #         query GetVariables($environmentId: String!) {
-#     #         variables(environmentId: $environmentId) {
-#     #             edges {
-#     #             node {
-#     #                 id
-#     #                 name
-#     #                 value
-#     #             }
-#     #             }
-#     #         }
-#     #         }
-#     #         """,
-#     #         "variables": {
-#     #             "environmentId": ENV_ID
-#     #         }
-#     #     }
-
-#     #     response = requests.post("https://gql.railway.app/graphql", headers=headers, json=query)
-        
-#     #     if response.status_code == 200:
-#     #         data = response.json()
-#     #         vars = data.get("data", {}).get("variables", {}).get("edges", [])
-#     #         print("🔍 Current environment variables:",flush=True)
-#     #         for var in vars:
-#     #             name = var["node"]["name"]
-#     #             val = var["node"]["value"]
-#     #             print(f" - {name} = {val[:10]}...",flush=True)  # show only first 10 chars for safety
-#     #     else:
-#     #         print(f"❌ Failed to fetch env vars: {response.text}",flush=True)
 
 #     try:
 #         config_doc = config_ref.get()
@@ -125,32 +77,23 @@
 
 #     old_private_key_raw = os.getenv("ENCRYPTION_PRIVATE_KEY", "")
 #     old_public_key_raw = os.getenv("ENCRYPTION_PUBLIC_KEY", "")
-#     print("✅ Project ID:", os.environ.get("RAILWAY_PROJECT_ID"),flush=True)
-#     print("✅ Env ID:", os.environ.get("RAILWAY_ENVIRONMENT_ID"),flush=True)
-#     print("✅ Token Exists:", bool(os.environ.get("RAILWAY_API_TOKEN")),flush=True)
+#     print("✅ Project ID:", os.environ.get("RAILWAY_PROJECT_ID"), flush=True)
+#     print("✅ Env ID:", os.environ.get("RAILWAY_ENVIRONMENT_ID"), flush=True)
+#     print("✅ Token Exists:", bool(os.environ.get("RAILWAY_API_TOKEN")), flush=True)
 
 #     is_first_time = not old_private_key_raw.strip() or not old_public_key_raw.strip()
 
-#     if isinstance(private_key_pem, str):
-#         private_key_pem = private_key_pem.encode()
-
-#     private_key = serialization.load_pem_private_key(
-#         private_key_pem,
-#         password=None,
-#         backend=default_backend()
-#     )
-
 #     if old_private_key_raw:
+#         if isinstance(old_private_key_raw, str):
+#             old_private_key_raw = old_private_key_raw.encode()
+
 #         old_private_key = serialization.load_pem_private_key(
-#             old_private_key_raw.encode(),
+#             old_private_key_raw,
 #             password=None,
 #             backend=default_backend()
 #         )
 #     else:
 #         old_private_key = None
-
-#     # old_private_key = fix_pem_format(old_private_key_raw)
-#     # old_public_key = fix_pem_format(old_public_key_raw)
 
 #     if is_first_time:
 #         print("🆕 No keys in env. Encrypting docs for the first time...", flush=True)
@@ -216,7 +159,6 @@
 #         print(f"⚠️ Failed to save timestamp in Firestore: {e}", flush=True)
 
 #     try:
-#         # list_env_vars_on_railway()
 #         auto_update_env_on_railway(new_private_key, new_public_key)
 #     except Exception as e:
 #         print("❌ Failed to auto-update Railway ENV vars:", flush=True)
@@ -307,11 +249,9 @@ def run():
     is_first_time = not old_private_key_raw.strip() or not old_public_key_raw.strip()
 
     if old_private_key_raw:
-        if isinstance(old_private_key_raw, str):
-            old_private_key_raw = old_private_key_raw.encode()
-
+        fixed_key = old_private_key_raw.replace('\\n', '\n').encode()
         old_private_key = serialization.load_pem_private_key(
-            old_private_key_raw,
+            fixed_key,
             password=None,
             backend=default_backend()
         )
