@@ -1,6 +1,5 @@
-echo "🚀 Entrypoint: Starting the app..."
 set -e
-
+echo "🚀 Entrypoint: Starting the app..."
 # echo "Applying database migrations..."
 # python manage.py migrate
 
