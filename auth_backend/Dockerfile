@@ -31,4 +31,4 @@ COPY . /app
 # RUN chmod +x /app/entrypoint.sh
 # RUN python manage.py migrate
 # RUN python run_waitress.py
-CMD ["python run_waitress.py"]
+CMD ["python manage.py migrate && python run_waitress.py"]
