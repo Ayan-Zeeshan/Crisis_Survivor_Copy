@@ -19,7 +19,7 @@ from cryptography.hazmat.backends import default_backend
 # Init Firebase DB
 db = firestore.client() 
 
-def health(request):
+def check_health(request):
     return JsonResponse({"status": "OK"}) 
 
 @csrf_exempt
