@@ -6,6 +6,9 @@
 from waitress import serve
 from auth_backend.wsgi import application
 import logging
+import sys
+
+sys.stdout.reconfigure(line_buffering=True)
 
 logging.basicConfig(level=logging.INFO)
 logging.info("🔥 Starting Waitress server on port 8000...")
