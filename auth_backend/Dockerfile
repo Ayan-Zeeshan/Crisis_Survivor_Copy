@@ -102,4 +102,5 @@ ENV PORT=8000
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+RUN /app/entrypoint.sh
+# ENTRYPOINT ["/app/entrypoint.sh"]
