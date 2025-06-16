@@ -13,5 +13,5 @@ logging.info("🔥 Starting Waitress server on port 8000...")
 print("🔥 Starting Waitress server on port 8000...", flush=True)
 
 if __name__ == '__main__':
-    print("✅ Waitress is starting on http://0.0.0.0:8000")  # Shows up in logs
+    print("✅ Waitress is starting on http://0.0.0.0:8000",flush=True)  # Shows up in logs
     serve(application, host='0.0.0.0', port=8000)

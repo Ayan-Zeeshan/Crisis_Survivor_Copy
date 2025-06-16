@@ -27,7 +27,8 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 COPY . /app
 
 # Add entrypoint
-COPY entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
-
-CMD ["/app/entrypoint.sh"]
+# COPY entrypoint.sh /app/entrypoint.sh
+# RUN chmod +x /app/entrypoint.sh
+RUN python manage.py migrate
+RUN python run_waitress.py
+# CMD ["/app/entrypoint.sh"]
