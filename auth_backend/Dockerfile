@@ -28,7 +28,7 @@ COPY . /app
 
 # Add entrypoint
 # COPY entrypoint.sh /app/entrypoint.sh
-# RUN chmod +x /app/entrypoint.sh
+RUN chmod +x entrypoint.sh
 # RUN python manage.py migrate
 # RUN python run_waitress.py
-CMD ["python manage.py migrate && python run_waitress.py"]
+RUN entrypoint.sh
