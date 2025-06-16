@@ -10,9 +10,22 @@ import sys
 
 sys.stdout.reconfigure(line_buffering=True)
 
-logging.basicConfig(level=logging.INFO)
-logging.info("🔥 Starting Waitress server on port 8000...")
-print("🔥 Starting Waitress server on port 8000...", flush=True)
+# logging.basicConfig(level=logging.INFO)
+# logging.info("🔥 Starting Waitress server on port 8000...")
+# print("🔥 Starting Waitress server on port 8000...", flush=True)
+# Log to both file and console
+logging.basicConfig(level=logging.DEBUG)
+logging.debug("=== Starting Waitress at 0.0.0.0:8000 ===")
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s %(message)s',
+    handlers=[
+        logging.FileHandler("server.log"),
+        logging.StreamHandler()
+    ]
+)
+
+logging.info("Waitress is starting...")
 
 if __name__ == '__main__':
     print("✅ Waitress is starting on http://0.0.0.0:8000",flush=True)  # Shows up in logs

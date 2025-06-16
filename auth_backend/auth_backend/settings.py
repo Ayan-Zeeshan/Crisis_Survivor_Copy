@@ -56,7 +56,7 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
 
 ALLOWED_HOSTS = [
-    'authbackend-production-ed7f.up.railway.app',
+    'authbackend-production-d43e.up.railway.app',
     'localhost',
     '127.0.0.1', "0.0.0.0", ".railway.app"
 ]
@@ -91,6 +91,18 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'auth_backend.urls'
+LOGGING = {
+    'version': 1,
+    'handlers': {
+        'console': {'class': 'logging.StreamHandler'},
+    },
+    'loggers': {
+        '': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    },
+}
 
 TEMPLATES = [
     {

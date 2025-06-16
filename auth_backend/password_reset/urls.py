@@ -9,5 +9,6 @@ urlpatterns = [
     path("rotate-keys/", rotate_keys_view),
     path("send-data/", send_data),
     path("receive-data/", receive_data), 
-    path('health/', check_health),
+    # path('health/', check_health),
+    path('api/health/', lambda req: JsonResponse({'status': 'ok'})),
 ]
