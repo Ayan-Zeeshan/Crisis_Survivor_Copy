@@ -6,6 +6,7 @@ from .firebase import auth as firebase_auth
 from .redis_client import redis
 from django.views.decorators.csrf import csrf_exempt
 import os
+import base64
 import json
 from django.conf import settings
 from dotenv import load_dotenv
@@ -16,8 +17,34 @@ from password_reset.utils.encryption import generate_ecc_keys, hybrid_encrypt, h
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
 
+b64 = os.getenv("FIREBASE_CREDENTIAL_BASE64")
+
+if not b64:
+    raise Exception("FIREBASE_CREDENTIAL_BASE64 is not set.")
+
+cred_dict = json.loads(base64.b64decode(b64))
+
+# initialize_app(cred)
+
+if not firebase_admin._apps:
+        # cred = credentials.Certificate({
+        #     "type": "service_account",
+        #     "project_id": os.getenv("FIREBASE_PROJECT_ID"),
+        #     "private_key_id": os.getenv("FIREBASE_PRIVATE_KEY_ID"),
+        #     "private_key": os.getenv("FIREBASE_PRIVATE_KEY"),#.replace('\\n', '\n'),
+        #     "client_email": os.getenv("FIREBASE_CLIENT_EMAIL"),
+        #     "client_id": os.getenv("FIREBASE_CLIENT_ID"),
+        #     "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        #     "token_uri": "https://oauth2.googleapis.com/token",
+        #     "auth_provider_x509_cert_url": "https://www.googleapis.com/v1/certs",
+        #     "client_x509_cert_url": os.getenv("FIREBASE_CLIENT_CERT_URL")
+        # })
+        cred = credentials.Certificate(cred_dict)
+        firebase_admin.initialize_app(cred)
+
+db = firestore.client()
+
 # Init Firebase DB
-db = firestore.client() 
 
 def check_health(request):
     return JsonResponse({"status": "OK"}) 
@@ -252,22 +279,7 @@ def rotate_keys_view(request):
 
     load_dotenv()
 
-    if not firebase_admin._apps:
-        cred = credentials.Certificate({
-            "type": "service_account",
-            "project_id": os.getenv("FIREBASE_PROJECT_ID"),
-            "private_key_id": os.getenv("FIREBASE_PRIVATE_KEY_ID"),
-            "private_key": os.getenv("FIREBASE_PRIVATE_KEY"),#.replace('\\n', '\n'),
-            "client_email": os.getenv("FIREBASE_CLIENT_EMAIL"),
-            "client_id": os.getenv("FIREBASE_CLIENT_ID"),
-            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-            "token_uri": "https://oauth2.googleapis.com/token",
-            "auth_provider_x509_cert_url": "https://www.googleapis.com/v1/certs",
-            "client_x509_cert_url": os.getenv("FIREBASE_CLIENT_CERT_URL")
-        })
-        firebase_admin.initialize_app(cred)
-
-    db = firestore.client()
+    
     old_private_key = os.getenv("ENCRYPTION_PRIVATE_KEY")
     new_private_key, new_public_key = generate_ecc_keys()
 
