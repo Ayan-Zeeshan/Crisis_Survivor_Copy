@@ -31,5 +31,5 @@ COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x entrypoint.sh
 # RUN python manage.py migrate
 # RUN python run_waitress.py
-RUN /app/entrypoint.sh
 # CMD ["python", "run_waitress.py"]
+CMD ["/bin/bash", "/app/entrypoint.sh"]
