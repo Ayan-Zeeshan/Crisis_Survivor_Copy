@@ -1,10 +1,13 @@
 [phases.setup]
-nixPkgs = ['python311','python311Packages.pip','openssl']
+nixPkgs = ['python311', 'python311Packages.pip', 'openssl']
 
 [phases.install]
 cmds = [
+  "python -m venv /app/venv",
+  "source /app/venv/bin/activate",
+  "pip install --upgrade pip",
   "pip install -r requirements.txt"
 ]
 
 [start]
-cmd = "python manage.py migrate && gunicorn auth_backend.wsgi:application --bind 0.0.0.0:8000"
+cmd = "source /app/venv/bin/activate && python manage.py migrate && gunicorn auth_backend.wsgi:application --bind 0.0.0.0:8000"
