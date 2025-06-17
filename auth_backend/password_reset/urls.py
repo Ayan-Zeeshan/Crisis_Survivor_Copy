@@ -10,5 +10,5 @@ urlpatterns = [
     path("send-data/", send_data),
     path("receive-data/", receive_data), 
     # path('health/', check_health),
-    path('api/health/', lambda req: JsonResponse({'status': 'ok'})),
+    path('health/', lambda req: JsonResponse({'status': 'ok'})),
 ]
