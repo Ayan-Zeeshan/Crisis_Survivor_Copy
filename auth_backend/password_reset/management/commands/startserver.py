@@ -8,6 +8,6 @@ class Command(BaseCommand):
     help = "Deploys the main Django Project!"
 
     def handle(self, *args, **kwargs):
-        from auth_backend import run_waitress
+        import run_waitress
         run_waitress.run()
         self.stdout.write(self.style.SUCCESS("Started deployment successfully!"))

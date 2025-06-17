@@ -122,7 +122,8 @@ RUN apt-get update && apt-get install -y curl
 ENV LOGGLY_ENDPOINT=https://logs.collector.na-01.cloud.solarwinds.com/v1/logs/bulk
 ENV LOGGLY_TOKEN=Rk3Ivo4u7Ya75xwsvJCMApXiinamr6O8LdTFZX7QKq32M5xt1znq_Yft7Cwm327S6I9QHYI
 
-COPY entrypoint.sh .
-RUN chmod +x entrypoint.sh
+# COPY entrypoint.sh .
+# RUN chmod +x entrypoint.sh
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+# ENTRYPOINT ["/app/entrypoint.sh"]
+CMD ["python","manage.py","migrate","python", "manage.py", "startserver"]
