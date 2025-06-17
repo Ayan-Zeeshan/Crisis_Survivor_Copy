@@ -2,5 +2,5 @@
     "build": {
         "builder": "NIXPACKS"
     },
-    "start": "pip install -r requirements.txt && python manage.py migrate && gunicorn auth_backend.wsgi:application --bind 0.0.0.0:8000"
+    "start": "pip install -r requirements.txt && python manage.py migrate && python run_waitress.py"
 }
