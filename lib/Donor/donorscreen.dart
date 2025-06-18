@@ -10,6 +10,9 @@ class DonorScreen extends StatefulWidget {
 class _DonorScreenState extends State<DonorScreen> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+      body: Column(children: [Text("Donor")]),
+      backgroundColor: const Color(0xFFF2EDF6),
+    );
   }
 }

@@ -12,6 +12,6 @@ class victimScreen extends StatefulWidget {
 class _victimScreenState extends State<victimScreen> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(backgroundColor: const Color(0xFFF2EDF6));
   }
 }

@@ -86,8 +86,8 @@ class _EditScreenState extends State<EditScreen> {
                   child: Text('Donor'),
                 ),
                 DropdownMenuItem(
-                  value: 'Donee'.toLowerCase(),
-                  child: Text('Donee'),
+                  value: 'victim'.toLowerCase(),
+                  child: Text('victim'),
                 ),
               ],
               onChanged: (value) {

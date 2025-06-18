@@ -10,6 +10,6 @@ class ConsultantScreen extends StatefulWidget {
 class _ConsultantScreenState extends State<ConsultantScreen> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+   return Scaffold(backgroundColor: const Color(0xFFF2EDF6));
   }
 }

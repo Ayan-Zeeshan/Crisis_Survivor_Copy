@@ -2,7 +2,7 @@
 
 import 'dart:convert';
 import 'dart:developer';
-import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crisis_survivor/Admin/adminPage.dart';
 import 'package:crisis_survivor/Victim/victimScreen.dart';
 import 'package:crisis_survivor/Donor/donorscreen.dart';
@@ -41,6 +41,8 @@ class _LoginState extends State<Login> {
   final TextEditingController _myController1 = TextEditingController();
   bool visibility = true;
   bool isButtonClicked = false;
+  Map? userData;
+  Map? responseData;
   // bool user = true;
   User? user;
   // bool emailExists = false;
@@ -140,7 +142,7 @@ class _LoginState extends State<Login> {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
       if (googleUser == null) return; // user cancelled
-
+      SharedPreferences _Pref = await SharedPreferences.getInstance();
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
       final OAuthCredential credential = GoogleAuthProvider.credential(
@@ -152,6 +154,59 @@ class _LoginState extends State<Login> {
           .signInWithCredential(credential);
       final User? user = userCredential.user;
 
+      if (user != null) {
+        // final cacheUserData = {
+        //   'username': username,
+        //   'email': email,
+        //   'role': null,
+        //   'time': DateTime.now().toString(),
+        // };
+
+        final String? username = user.displayName;
+        // Step 1: Get latest user data from API
+        final response = await http.post(
+          Uri.parse(
+            "https://authbackend-production-d43e.up.railway.app/api/receive-data/",
+          ),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({"uid": user.uid}),
+        );
+
+        if (response.statusCode == 200) {
+          //Map<String, dynamic>
+          responseData = json.decode(response.body);
+          //Map<String, dynamic>
+          userData = responseData!['data'];
+        } else {
+          print("❌ Failed to fetch user data from backend");
+        }
+
+        // Step 2: Update role
+        final role = userData!['role'];
+
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Signed in as $username')));
+        if (role.isEmpty || role == Null) {
+          log('$userData');
+          await _Pref.setString('Data', json.encode(userData));
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const Roles()),
+          );
+        } else {
+          log('$userData');
+          await _Pref.setString('Data', json.encode(userData));
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  RoleBasedHome(role: role.toString().toLowerCase()),
+            ),
+          );
+        }
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Signed in with Google'),
@@ -159,60 +214,42 @@ class _LoginState extends State<Login> {
         ),
       );
 
-      final DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection("users")
-          .doc(userCredential.user?.uid)
-          .get();
-
-      if (userDoc.exists) {
-        final userData = userDoc.data() as Map<String, dynamic>;
-        final userDetails = {
-          'username': userData['username'],
-          'email': userData['email'],
-          'role': userData['role'],
-          'time': DateTime.now().toString(),
-        };
-
-        SharedPreferences _Pref = await SharedPreferences.getInstance();
-        await _Pref.setString('Data', json.encode(userDetails));
-
-        setState(() {
-          // user = userData['role'] == 'User';
-        });
-        if (userDetails['role'] != null ||
-            (userDetails['role'].toString()).isNotEmpty) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => RoleBasedHome(
-                role: (userDetails['role'].toString()).toLowerCase(),
-              ),
-            ),
-          );
-        }
-        // if ((userDetails['role'].toString()).toLowerCase() == "" ||
-        //     (userDetails['role'].toString()).toLowerCase() == null) {
-        //   Navigator.pushReplacement(
-        //     context,
-        //     MaterialPageRoute(builder: (context) => const Roles()),
-        //   );
-        // } else if ((userDetails['role'].toString()).toLowerCase() == "admin") {
-        //   Navigator.pushReplacement(
-        //     context,
-        //     MaterialPageRoute(builder: (context) => const Admin()),
-        //   );
-        // } else if ((userDetails['role'].toString()).toLowerCase() == "Donor") {
-        //   Navigator.pushReplacement(
-        //     context,
-        //     MaterialPageRoute(builder: (context) => const DonorScreen()),
-        //   );
-        // } else if ((userDetails['role'].toString()).toLowerCase() == "Donee") {
-        //   Navigator.pushReplacement(
-        //     context,
-        //     MaterialPageRoute(builder: (context) => const victimScreen()),
-        //   );
-        // }
-      }
+      setState(() {
+        // user = userData['role'] == 'User';
+      });
+      // if (userDetails['role'] != null ||
+      //     (userDetails['role'].toString()).isNotEmpty) {
+      //   Navigator.pushReplacement(
+      //     context,
+      //     MaterialPageRoute(
+      //       builder: (context) => RoleBasedHome(
+      //         role: (userDetails['role'].toString()).toLowerCase(),
+      //       ),
+      //     ),
+      //   );
+      // }
+      // if ((userDetails['role'].toString()).toLowerCase() == "" ||
+      //     (userDetails['role'].toString()).toLowerCase() == null) {
+      //   Navigator.pushReplacement(
+      //     context,
+      //     MaterialPageRoute(builder: (context) => const Roles()),
+      //   );
+      // } else if ((userDetails['role'].toString()).toLowerCase() == "admin") {
+      //   Navigator.pushReplacement(
+      //     context,
+      //     MaterialPageRoute(builder: (context) => const Admin()),
+      //   );
+      // } else if ((userDetails['role'].toString()).toLowerCase() == "Donor") {
+      //   Navigator.pushReplacement(
+      //     context,
+      //     MaterialPageRoute(builder: (context) => const DonorScreen()),
+      //   );
+      // } else if ((userDetails['role'].toString()).toLowerCase() == "victim") {
+      //   Navigator.pushReplacement(
+      //     context,
+      //     MaterialPageRoute(builder: (context) => const victimScreen()),
+      //   );
+      // }
     } catch (e) {
       ScaffoldMessenger.of(
         context,
@@ -222,11 +259,12 @@ class _LoginState extends State<Login> {
 
   void loginWithFirebase() async {
     SharedPreferences _Pref = await SharedPreferences.getInstance();
-    final QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection("users")
-        .where('email', isEqualTo: _myController.text)
-        .limit(1)
-        .get();
+    // final QuerySnapshot snapshot = await FirebaseFirestore.instance
+    //     .collection("users")
+    //     .where('email', isEqualTo: _myController.text)
+    //     .limit(1)
+    //     .get();
+
     dynamic cache = _Pref.getString('Data');
 
     if (cache != null && cache.isNotEmpty) {
@@ -260,6 +298,61 @@ class _LoginState extends State<Login> {
         email: _myController.text,
         password: _myController1.text,
       );
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+        // final cacheUserData = {
+        //   'username': username,
+        //   'email': email,
+        //   'role': null,
+        //   'time': DateTime.now().toString(),
+        // };
+
+        // final String? username = user.displayName;
+        // Step 1: Get latest user data from API
+        final response = await http.post(
+          Uri.parse(
+            "https://authbackend-production-d43e.up.railway.app/api/receive-data/",
+          ),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({"uid": user.uid}),
+        );
+
+        if (response.statusCode == 200) {
+          //Map<String, dynamic>
+          responseData = json.decode(response.body);
+          //Map<String, dynamic>
+          // cacheUserData = json.encode(responseData);
+          userData = responseData!['data'];
+        } else {
+          print("❌ Failed to fetch user data from backend");
+        }
+
+        // Step 2: Update role
+        final role = userData!['role'];
+        final username = userData!['username'];
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Signed in as $username')));
+        if (role.isEmpty || role == Null) {
+          log('$userData');
+          await _Pref.setString('Data', json.encode(userData));
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const Roles()),
+          );
+        } else {
+          log('$userData');
+          await _Pref.setString('Data', json.encode(userData));
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  RoleBasedHome(role: role.toString().toLowerCase()),
+            ),
+          );
+        }
+      }
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -268,29 +361,26 @@ class _LoginState extends State<Login> {
         ),
       );
 
-      if (snapshot.docs.isNotEmpty) {
-        final DocumentSnapshot data = snapshot.docs.first;
-        final Map userDetails = {
-          'username': data['username'],
-          'email': data['email'],
-          'role': data['role'],
-          'time': DateTime.now().toString(),
-        };
-        setState(() {
-          // if (data['role'] == 'User') {
-          //   user = true;
-          // } else if (data['role'] == 'Admin') {
-          //   user = false;
-          // }
-        });
-        log('$userDetails');
-        _Pref.setString('Data', json.encode(userDetails)).then((value) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const Roles()),
-          );
-        });
-      }
+      // if (snapshot.docs.isNotEmpty) {
+      //   final DocumentSnapshot data = snapshot.docs.first;
+      //   final Map userDetails = {
+      //     'username': data['username'],
+      //     'email': data['email'],
+      //     'role': data['role'],
+      //     'time': DateTime.now().toString(),
+      //   };
+      setState(() {
+        // if (data['role'] == 'User') {
+        //   user = true;
+        // } else if (data['role'] == 'Admin') {
+        //   user = false;
+        // }
+      }); //.then((value) {
+      //   Navigator.pushReplacement(
+      //     context,
+      //     MaterialPageRoute(builder: (context) => const Roles()),
+      //   );
+      // });
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(
         context,
