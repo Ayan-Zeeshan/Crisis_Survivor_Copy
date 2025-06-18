@@ -51,7 +51,7 @@
 //     try {
 //       final response = await http.post(
 //         Uri.parse(
-//           "https://authbackend-production-ed7f.up.railway.app/api/delete-user/",
+//           "https://authbackend-production-d43e.up.railway.app/api/delete-user/",
 //         ),
 //         headers: {'Content-Type': 'application/json'},
 //         body: jsonEncode({
@@ -236,7 +236,7 @@ class _UsersState extends State<Users> {
     try {
       final response = await http.post(
         Uri.parse(
-          "https://authbackend-production-ed7f.up.railway.app/api/delete-user/",
+          "https://authbackend-production-d43e.up.railway.app/api/delete-user/",
         ),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({

@@ -233,7 +233,7 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
       // Check if the email exists
       final checkResponse = await http.post(
         Uri.parse(
-          "https://authbackend-production-ed7f.up.railway.app/api/check-email/",
+          "https://authbackend-production-d43e.up.railway.app/api/check-email/",
         ),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email}),
@@ -247,7 +247,7 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
         // Send the reset code
         final resetResponse = await http.post(
           Uri.parse(
-            "https://authbackend-production-ed7f.up.railway.app/api/send-code/",
+            "https://authbackend-production-d43e.up.railway.app/api/send-code/",
           ),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({'email': email}),
@@ -277,7 +277,7 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
     try {
       final response = await http.post(
         Uri.parse(
-          "https://authbackend-production-ed7f.up.railway.app/api/verify-code/",
+          "https://authbackend-production-d43e.up.railway.app/api/verify-code/",
         ),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'code': code}),

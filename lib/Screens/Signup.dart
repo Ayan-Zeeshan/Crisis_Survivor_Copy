@@ -84,7 +84,7 @@ class _Sign_UpState extends State<Sign_Up> {
       // Check if the email exists
       final checkResponse = await http.post(
         Uri.parse(
-          "https://authbackend-production-ed7f.up.railway.app/api/check-email/",
+          "https://authbackend-production-d43e.up.railway.app/api/check-email/",
         ),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email}),
@@ -208,10 +208,105 @@ class _Sign_UpState extends State<Sign_Up> {
     }
   }
 
+  // sendDatatoFireStore() async {
+  //   final _db = FirebaseFirestore.instance;
+
+  //   final dataList = {
+  //     "username": _myController.text,
+  //     "email": _myController2.text,
+  //     "role": null,
+  //     "time": DateTime.now().toString(),
+  //     "uid":
+  //   };
+
+  //   SharedPreferences _pref = await SharedPreferences.getInstance();
+  //   final checkResponse = await http.post(
+  //     Uri.parse(
+  //       "https://authbackend-production-d43e.up.railway.app/api/send-data/",
+  //     ),
+  //     headers: {'Content-Type': 'application/json'},
+  //     body: jsonEncode(dataList),
+  //   );
+  //   // Use Firebase Auth user UID as document ID
+  //   final user = FirebaseAuth.instance.currentUser;
+  //   if (user != null) {
+  //     await _db.collection("users").doc(user.uid).set(dataList);
+
+  //     await _pref.setString('Data', json.encode(dataList));
+  //   }
+
+  //   setState(() {});
+  // }
+
+  // Future<void> signInWithGoogle() async {
+  //   try {
+  //     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+  //     if (googleUser == null) return; // User cancelled
+
+  //     final GoogleSignInAuthentication googleAuth =
+  //         await googleUser.authentication;
+
+  //     final OAuthCredential credential = GoogleAuthProvider.credential(
+  //       accessToken: googleAuth.accessToken,
+  //       idToken: googleAuth.idToken,
+  //     );
+
+  //     final UserCredential userCredential = await FirebaseAuth.instance
+  //         .signInWithCredential(credential);
+
+  //     final User? user = userCredential.user;
+
+  //     if (user != null) {
+  //       final String? username = user.displayName;
+  //       final String? email = user.email;
+
+  //       final userData = {
+  //         'username': username,
+  //         'email': email,
+  //         'role': null,
+  //         'time': DateTime.now().toString(),
+  //       };
+
+  //       print(userData);
+
+  //       final SharedPreferences _prefs = await SharedPreferences.getInstance();
+  //       await _prefs.setString('Data', json.encode(userData));
+
+  //       // Save to Firestore if needed
+  //       await FirebaseFirestore.instance
+  //           .collection('users')
+  //           .doc(user.uid)
+  //           .set(userData);
+  //       Navigator.pushReplacement(
+  //         context,
+  //         MaterialPageRoute(builder: (context) => const Roles()),
+  //       );
+  //       ScaffoldMessenger.of(
+  //         context,
+  //       ).showSnackBar(SnackBar(content: Text('Signed in as $username')));
+  //     }
+  //   } catch (e) {
+  //     if (kDebugMode) print('Error signing in with Google: $e');
+  //     ScaffoldMessenger.of(
+  //       context,
+  //     ).showSnackBar(SnackBar(content: Text('Google Sign-In failed')));
+  //   }
+  // }
   sendDatatoFireStore() async {
     final _db = FirebaseFirestore.instance;
 
-    final dataList = {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final fullDataList = {
+      "username": _myController.text,
+      "email": _myController2.text,
+      "role": null,
+      "time": DateTime.now().toString(),
+      "uid": user.uid,
+    };
+
+    final cacheSafeMap = {
       "username": _myController.text,
       "email": _myController2.text,
       "role": null,
@@ -220,13 +315,18 @@ class _Sign_UpState extends State<Sign_Up> {
 
     SharedPreferences _pref = await SharedPreferences.getInstance();
 
-    // Use Firebase Auth user UID as document ID
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      await _db.collection("users").doc(user.uid).set(dataList);
+    // Send to your Django backend
+    final checkResponse = await http.post(
+      Uri.parse(
+        "https://authbackend-production-d43e.up.railway.app/api/send-data/",
+      ),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(fullDataList),
+    );
 
-      await _pref.setString('Data', json.encode(dataList));
-    }
+    // await _db.collection("users").doc(user.uid).set(fullDataList);
+
+    await _pref.setString('Data', json.encode(cacheSafeMap));
 
     setState(() {});
   }
@@ -234,7 +334,7 @@ class _Sign_UpState extends State<Sign_Up> {
   Future<void> signInWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) return; // User cancelled
+      if (googleUser == null) return;
 
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
@@ -253,27 +353,41 @@ class _Sign_UpState extends State<Sign_Up> {
         final String? username = user.displayName;
         final String? email = user.email;
 
-        final userData = {
+        final fullUserData = {
+          'username': username,
+          'email': email,
+          'role': null,
+          'time': DateTime.now().toString(),
+          'uid': user.uid,
+        };
+        // Send to your Django backend
+        final checkResponse = await http.post(
+          Uri.parse(
+            "https://authbackend-production-d43e.up.railway.app/api/send-data/",
+          ),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(fullUserData),
+        );
+        final cacheUserData = {
           'username': username,
           'email': email,
           'role': null,
           'time': DateTime.now().toString(),
         };
 
-        print(userData);
-
         final SharedPreferences _prefs = await SharedPreferences.getInstance();
-        await _prefs.setString('Data', json.encode(userData));
+        await _prefs.setString('Data', json.encode(cacheUserData));
 
-        // Save to Firestore if needed
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .set(userData);
+        // await FirebaseFirestore.instance
+        //     .collection('users')
+        //     .doc(user.uid)
+        //     .set(fullUserData);
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const Roles()),
         );
+
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Signed in as $username')));

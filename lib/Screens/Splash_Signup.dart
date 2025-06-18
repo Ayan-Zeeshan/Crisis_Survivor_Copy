@@ -1,7 +1,6 @@
 // ignore_for_file: avoid_print, camel_case_types, no_leading_underscores_for_local_identifiers, avoid_unnecessary_containers, use_build_context_synchronously, depend_on_referenced_packages, file_names
 // import 'dart:async';
 import 'package:crisis_survivor/Screens/Signup.dart';
-import 'package:crisis_survivor/Victim/sheltermap.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
@@ -31,7 +30,7 @@ class _SplashSignUpState extends State<SplashSignUp> {
           !_controller.value.isPlaying) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => MapPage()), // Sign_Up()),
+          MaterialPageRoute(builder: (_) => Sign_Up()), //MapPage()),
         );
       }
     });

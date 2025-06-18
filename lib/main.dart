@@ -1,10 +1,128 @@
+// // // ignore_for_file: unnecessary_null_comparison, avoid_print, no_leading_underscores_for_local_identifiers, unrelated_type_equality_checks, non_constant_identifier_names
+
+// // import 'dart:convert';
+// // import 'dart:developer';
+
+// // import 'package:crisis_survivor/Screens/splash_signup.dart';
+// // import 'package:crisis_survivor/Screens/splashscreen.dart';
+// // import 'package:firebase_core/firebase_core.dart';
+// // import 'package:cloud_firestore/cloud_firestore.dart';
+// // import 'package:flutter/material.dart';
+// // import 'package:crisis_survivor/firebase_options.dart';
+// // import 'package:permission_handler/permission_handler.dart';
+// // import 'package:shared_preferences/shared_preferences.dart';
+
+// // void main() async {
+// //   WidgetsFlutterBinding.ensureInitialized();
+// //   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+// //   runApp(const MyApp());
+// // }
+
+// // class MyApp extends StatefulWidget {
+// //   const MyApp({super.key});
+
+// //   @override
+// //   State<MyApp> createState() => _MyAppState();
+// // }
+
+// // class _MyAppState extends State<MyApp> {
+// //   late Widget Screen;
+
+// //   Future<void> _checkPermissionsAndPrefs() async {
+// //     Map<Permission, PermissionStatus> statuses = await [
+// //       Permission.camera,
+// //       Permission.storage,
+// //       Permission.mediaLibrary,
+// //     ].request();
+
+// //     bool allGranted = statuses.values.every((status) => status.isGranted);
+// //     if (!allGranted) {
+// //       print('Permissions not granted');
+// //       bool isPermanentlyDenied = statuses.values.any(
+// //         (status) => status.isPermanentlyDenied,
+// //       );
+// //       if (isPermanentlyDenied) {
+// //         print('Permissions permanently denied');
+// //         openAppSettings();
+// //       }
+// //     } else {
+// //       print('Permissions granted!');
+// //     }
+
+// //     // Now call getPrefs
+// //     SharedPreferences _pref = await SharedPreferences.getInstance();
+// //     String? dataString = _pref.getString('Data');
+// //     if (dataString != null && dataString.isNotEmpty) {
+// //       try {
+// //         Map<String, dynamic> cache = json.decode(dataString);
+// //         log(cache.toString());
+
+// //         final QuerySnapshot snapshot = await FirebaseFirestore.instance
+// //             .collection("users")
+// //             .where('email', isEqualTo: cache['email'])
+// //             .limit(1)
+// //             .get();
+
+// //         if (snapshot.docs.isNotEmpty) {
+// //           log("Navigation = true");
+// //           Screen = Splash_Screen(); // Navigate to splash screen
+// //         } else {
+// //           log("Navigation = false");
+// //           Screen = SplashSignUp();
+// //           await _pref.clear();
+// //         }
+// //       } catch (e) {
+// //         log("Error decoding JSON or fetching user: $e");
+// //         Screen = SplashSignUp(); // fallback screen on error
+// //       }
+// //     } else {
+// //       log("No cached data found.");
+// //       Screen = SplashSignUp(); // fallback if no cache
+// //     }
+// //   }
+
+// //   @override
+// //   Widget build(BuildContext context) {
+// //     return MaterialApp(
+// //       debugShowCheckedModeBanner: false,
+// //       title: 'Crisis Survivor',
+// //       theme: ThemeData(primarySwatch: Colors.blue),
+// //       home: FutureBuilder<void>(
+// //         future: _checkPermissionsAndPrefs(),
+// //         builder: (context, snapshot) {
+// //           if (snapshot.connectionState == ConnectionState.waiting) {
+// //             return const Scaffold(
+// //               body: Center(
+// //                 child: CircleAvatar(
+// //                   radius: 70,
+// //                   backgroundImage: AssetImage('assets/splash.png'),
+// //                 ),
+// //               ),
+// //             );
+// //           } else if (snapshot.hasError) {
+// //             return const Scaffold(
+// //               body: Center(
+// //                 child: Text(
+// //                   'Error requesting permissions: Permission Required!',
+// //                 ),
+// //               ),
+// //             );
+// //           } else {
+// //             return Scaffold(body: Screen);
+// //           }
+// //         },
+// //       ),
+// //       color: Color(0xFFF2EDF6),
+// //     );
+// //   }
+// // }
 // // ignore_for_file: unnecessary_null_comparison, avoid_print, no_leading_underscores_for_local_identifiers, unrelated_type_equality_checks, non_constant_identifier_names
 
 // import 'dart:convert';
 // import 'dart:developer';
 
 // import 'package:crisis_survivor/Screens/splash_signup.dart';
-// import 'package:crisis_survivor/Screens/splashscreen.dart';
+// import 'package:crisis_survivor/Screens/Splash_Screen.dart';
 // import 'package:firebase_core/firebase_core.dart';
 // import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:flutter/material.dart';
@@ -33,6 +151,8 @@
 //       Permission.camera,
 //       Permission.storage,
 //       Permission.mediaLibrary,
+//       Permission.location,
+//       Permission.locationWhenInUse,
 //     ].request();
 
 //     bool allGranted = statuses.values.every((status) => status.isGranted);
@@ -49,7 +169,6 @@
 //       print('Permissions granted!');
 //     }
 
-//     // Now call getPrefs
 //     SharedPreferences _pref = await SharedPreferences.getInstance();
 //     String? dataString = _pref.getString('Data');
 //     if (dataString != null && dataString.isNotEmpty) {
@@ -116,19 +235,20 @@
 //     );
 //   }
 // }
+
 // ignore_for_file: unnecessary_null_comparison, avoid_print, no_leading_underscores_for_local_identifiers, unrelated_type_equality_checks, non_constant_identifier_names
 
 import 'dart:convert';
 import 'dart:developer';
-
 import 'package:crisis_survivor/Screens/splash_signup.dart';
 import 'package:crisis_survivor/Screens/Splash_Screen.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:crisis_survivor/firebase_options.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -174,24 +294,35 @@ class _MyAppState extends State<MyApp> {
     if (dataString != null && dataString.isNotEmpty) {
       try {
         Map<String, dynamic> cache = json.decode(dataString);
-        log(cache.toString());
+        log("Cached Data: $cache");
 
-        final QuerySnapshot snapshot = await FirebaseFirestore.instance
-            .collection("users")
-            .where('email', isEqualTo: cache['email'])
-            .limit(1)
-            .get();
+        // ✅ Call Django API using UID to verify user
+        final currentUser = FirebaseAuth.instance.currentUser;
 
-        if (snapshot.docs.isNotEmpty) {
-          log("Navigation = true");
-          Screen = Splash_Screen(); // Navigate to splash screen
-        } else {
-          log("Navigation = false");
-          Screen = SplashSignUp();
-          await _pref.clear();
+        if (currentUser != null) {
+          final response = await http.post(
+            Uri.parse(
+              "https://authbackend-production-d43e.up.railway.app/api/receive-data/",
+            ),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({"uid": currentUser.uid}),
+          );
+
+          if (response.statusCode == 200) {
+            final decoded = json.decode(response.body);
+            if (decoded['data'] != null) {
+              log("Navigation = true");
+              Screen = Splash_Screen(); // Navigate to splash screen
+              return;
+            }
+          }
         }
+
+        log("Navigation = false");
+        Screen = SplashSignUp();
+        await _pref.clear();
       } catch (e) {
-        log("Error decoding JSON or fetching user: $e");
+        log("Error during user validation: $e");
         Screen = SplashSignUp(); // fallback screen on error
       }
     } else {
@@ -231,7 +362,7 @@ class _MyAppState extends State<MyApp> {
           }
         },
       ),
-      color: Color(0xFFF2EDF6),
+      color: const Color(0xFFF2EDF6),
     );
   }
 }

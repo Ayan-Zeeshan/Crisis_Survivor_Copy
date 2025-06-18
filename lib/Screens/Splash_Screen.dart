@@ -1,12 +1,14 @@
-// // ignore_for_file: avoid_print, camel_case_types, no_leading_underscores_for_local_identifiers, avoid_unnecessary_containers, use_build_context_synchronously, unused_import
+// // ignore_for_file: avoid_print, camel_case_types, no_leading_underscores_for_local_identifiers, avoid_unnecessary_containers, use_build_context_synchronously, unused_import, file_names
 // import 'dart:async';
 // import 'dart:convert';
 // // import 'dart:developer';
 // import 'package:crisis_survivor/Admin/adminPage.dart';
-// import 'package:crisis_survivor/Donee/doneecreen.dart';
+// import 'package:crisis_survivor/Victim/victimScreen.dart';
 // import 'package:crisis_survivor/Donor/donorscreen.dart';
 // import 'package:crisis_survivor/Screens/Roles.dart';
+// import 'package:crisis_survivor/Screens/roleBasedNavigation.dart';
 // import 'package:flutter/material.dart';
+// import 'package:http/http.dart' as http;
 // import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:video_player/video_player.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
@@ -47,12 +49,20 @@
 //     final currentUser = FirebaseAuth.instance.currentUser;
 
 //     if (currentUser != null) {
-//       final DocumentSnapshot userDoc = await FirebaseFirestore.instance
-//           .collection("users")
-//           .doc(currentUser.uid)
-//           .get();
+//       // final DocumentSnapshot userDoc = await FirebaseFirestore.instance
+//       //     .collection("users")
+//       //     .doc(currentUser.uid)
+//       //     .get();
 
-//       if (userDoc.exists) {
+//       final checkResponse = await http.post(
+//         Uri.parse(
+//           "https://authbackend-production-d43e.up.railway.app/api/receive-data/",
+//         ),
+//         headers: {'Content-Type': 'application/json'},
+//         body: jsonEncode(currentUser.uid),
+//       );
+//       Map decodedResponse = json.decode(checkResponse);
+//       if (decodedResponse != {} || decodedResponse != null) {
 //         final userData = userDoc.data() as Map<String, dynamic>;
 //         final userDetails = {
 //           'username': userData['username'],
@@ -64,25 +74,15 @@
 //         SharedPreferences _pref = await SharedPreferences.getInstance();
 //         await _pref.setString('Data', json.encode(userDetails));
 
-//         if (userDetails['role'] == null || userDetails['role'] == "") {
+//         if (userDetails['role'] != null ||
+//             (userDetails['role'].toString()).isNotEmpty) {
 //           Navigator.pushReplacement(
 //             context,
-//             MaterialPageRoute(builder: (context) => const Roles()),
-//           );
-//         } else if ((userDetails['role'].toString()).toLowerCase() == "admin") {
-//           Navigator.pushReplacement(
-//             context,
-//             MaterialPageRoute(builder: (context) => const Admin()),
-//           );
-//         } else if ((userDetails['role'].toString()).toLowerCase() == "donee") {
-//           Navigator.pushReplacement(
-//             context,
-//             MaterialPageRoute(builder: (context) => const victimScreen()),
-//           );
-//         } else if ((userDetails['role'].toString()).toLowerCase() == "donor") {
-//           Navigator.pushReplacement(
-//             context,
-//             MaterialPageRoute(builder: (context) => const DonorScreen()),
+//             MaterialPageRoute(
+//               builder: (context) => RoleBasedHome(
+//                 role: (userDetails['role'].toString()).toLowerCase(),
+//               ),
+//             ),
 //           );
 //         }
 //       }
@@ -112,13 +112,14 @@
 // ignore_for_file: avoid_print, camel_case_types, no_leading_underscores_for_local_identifiers, avoid_unnecessary_containers, use_build_context_synchronously, unused_import, file_names
 import 'dart:async';
 import 'dart:convert';
-// import 'dart:developer';
+import 'dart:developer';
 import 'package:crisis_survivor/Admin/adminPage.dart';
 import 'package:crisis_survivor/Victim/victimScreen.dart';
 import 'package:crisis_survivor/Donor/donorscreen.dart';
 import 'package:crisis_survivor/Screens/Roles.dart';
 import 'package:crisis_survivor/Screens/roleBasedNavigation.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -159,50 +160,50 @@ class _Splash_ScreenState extends State<Splash_Screen> {
     final currentUser = FirebaseAuth.instance.currentUser;
 
     if (currentUser != null) {
-      final DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection("users")
-          .doc(currentUser.uid)
-          .get();
+      final checkResponse = await http.post(
+        Uri.parse(
+          "https://authbackend-production-d43e.up.railway.app/api/receive-data/",
+        ),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({"uid": currentUser.uid}), // ✅ correct structure
+      );
 
-      if (userDoc.exists) {
-        final userData = userDoc.data() as Map<String, dynamic>;
-        final userDetails = {
-          'username': userData['username'],
-          'email': userData['email'],
-          'role': userData['role'],
-          'time': DateTime.now().toString(),
-        };
+      if (checkResponse.statusCode == 200) {
+        final decodedResponse = json.decode(checkResponse.body);
 
-        SharedPreferences _pref = await SharedPreferences.getInstance();
-        await _pref.setString('Data', json.encode(userDetails));
+        if (decodedResponse['data'] != null) {
+          final userData = decodedResponse['data'];
+          final userDetails = {
+            'username': userData['username'],
+            'email': userData['email'],
+            'role': userData['role'],
+            'time': DateTime.now().toString(),
+          };
 
-        if (userDetails['role'] != null ||
-            (userDetails['role'].toString()).isNotEmpty) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => RoleBasedHome(
-                role: (userDetails['role'].toString()).toLowerCase(),
+          SharedPreferences _pref = await SharedPreferences.getInstance();
+          await _pref.setString('Data', json.encode(userDetails));
+
+          final role = userDetails['role'];
+          log(role);
+          if (role != null && role.toString().isNotEmpty) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    RoleBasedHome(role: role.toString().toLowerCase()),
               ),
-            ),
-          );
+            );
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const Roles()),
+            );
+          }
+        } else {
+          print("⚠️ No data field found in response");
         }
-        //  else if ((userDetails['role'].toString()).toLowerCase() == "admin") {
-        //   Navigator.pushReplacement(
-        //     context,
-        //     MaterialPageRoute(builder: (context) => const Admin()),
-        //   );
-        // } else if ((userDetails['role'].toString()).toLowerCase() == "donee") {
-        //   Navigator.pushReplacement(
-        //     context,
-        //     MaterialPageRoute(builder: (context) => const victimScreen()),
-        //   );
-        // } else if ((userDetails['role'].toString()).toLowerCase() == "donor") {
-        //   Navigator.pushReplacement(
-        //     context,
-        //     MaterialPageRoute(builder: (context) => const DonorScreen()),
-        //   );
-        // }
+      } else {
+        print("⚠️ Backend error: ${checkResponse.body}");
       }
     }
   }

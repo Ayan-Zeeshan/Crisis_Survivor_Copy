@@ -52,7 +52,7 @@ class _LoginState extends State<Login> {
   //     // Check if the email exists
   //     final checkResponse = await http.post(
   //       Uri.parse(
-  //         "https://authbackend-production-ed7f.up.railway.app/api/check-email/",
+  //         "https://authbackend-production-d43e.up.railway.app/api/check-email/",
   //       ),
   //       headers: {'Content-Type': 'application/json'},
   //       body: jsonEncode({'email': email}),
@@ -94,7 +94,7 @@ class _LoginState extends State<Login> {
     try {
       final checkResponse = await http.post(
         Uri.parse(
-          "https://authbackend-production-ed7f.up.railway.app/api/check-email/",
+          "https://authbackend-production-d43e.up.railway.app/api/check-email/",
         ),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
