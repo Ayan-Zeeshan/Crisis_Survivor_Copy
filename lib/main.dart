@@ -151,6 +151,8 @@ class _MyAppState extends State<MyApp> {
       Permission.camera,
       Permission.storage,
       Permission.mediaLibrary,
+      Permission.location,
+      Permission.locationWhenInUse,
     ].request();
 
     bool allGranted = statuses.values.every((status) => status.isGranted);

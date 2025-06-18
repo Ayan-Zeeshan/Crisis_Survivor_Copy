@@ -47,6 +47,23 @@ dependencies:
   flutter_gif: ^0.0.4
   http: ^1.4.0
   flutter_stripe: ^11.5.0
+  dio: ^5.8.0
+  # flutter_osm_interface:
+    # git:
+    #   url: https://github.com/Ayan-Zeeshan/osm_flutter/tree/main/flutter_osm_interface.git
+    #   ref: main  # or whatever branch you edited
+  flutter_osm_interface:
+    git:
+      url: https://github.com/Ayan-Zeeshan/osm_flutter.git
+      ref: main
+      path: flutter_osm_interface
+
+  flutter_osm_plugin:
+    git:
+      url: https://github.com/Ayan-Zeeshan/osm_flutter.git
+      ref: main
+  geocoding: ^4.0.0
+  geolocator: ^14.0.1
 
 dev_dependencies:
   flutter_test:
