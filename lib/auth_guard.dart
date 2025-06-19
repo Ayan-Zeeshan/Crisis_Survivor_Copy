@@ -170,37 +170,37 @@ class AuthGuard {
     });
 
     // 🔁 Start periodic role checking
-    _roleCheckTimer = Timer.periodic(const Duration(seconds: 10), (_) async {
-      try {
-        final response = await http.post(
-          Uri.parse(
-            "https://authbackend-production-d43e.up.railway.app/api/receive-data/",
-          ),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({'uid': uid}),
-        );
+    _roleCheckTimer = Timer.periodic(const Duration(seconds: 60), (_) async {
+      // try {
+      final response = await http.post(
+        Uri.parse(
+          "https://authbackend-production-d43e.up.railway.app/api/receive-data/",
+        ),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'uid': uid}),
+      );
 
-        if (response.statusCode == 200) {
-          final responseData = json.decode(response.body);
-          final updatedUserData = responseData['data'];
-          final newRole = updatedUserData['role'];
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        final updatedUserData = responseData['data'];
+        final newRole = updatedUserData['role'];
 
-          final cachedUserData = json.decode(dataString);
-          final currentRole = cachedUserData['role'];
+        final cachedUserData = json.decode(dataString);
+        final currentRole = cachedUserData['role'];
 
-          if (newRole != currentRole) {
-            // Update SharedPreferences with new role data
-            await prefs.setString('Data', json.encode(updatedUserData));
+        if (newRole != currentRole) {
+          // Update SharedPreferences with new role data
+          await prefs.setString('Data', json.encode(updatedUserData));
 
-            // Navigate to updated role page
-            _navigateToRolePage(context, newRole.toString().toLowerCase());
-          }
-        } else {
-          print("❌ Failed to fetch role data from backend.");
+          // Navigate to updated role page
+          _navigateToRolePage(context, newRole.toString().toLowerCase());
         }
-      } catch (e) {
-        print("❌ Error checking role: $e");
+      } else {
+        print("❌ Failed to fetch role data from backend.");
       }
+      // } catch (e) {
+      //   print("❌ Error checking role: $e");
+      // }
     });
   }
 
@@ -225,14 +225,14 @@ class AuthGuard {
     }
 
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => destination),
+      MaterialPageRoute(builder: (context) => destination),
       (route) => false,
     );
   }
 
   static void _forceLogout(BuildContext context) {
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const SplashSignUp()),
+      MaterialPageRoute(builder: (context) => const SplashSignUp()),
       (route) => false,
     );
   }
