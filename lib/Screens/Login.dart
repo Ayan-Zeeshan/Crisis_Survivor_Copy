@@ -37,42 +37,27 @@ class _LoginState extends State<Login> {
     }
   }
 
+  Future<void> storeFirebaseToken() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      final idToken = await user.getIdToken(true); // Force refresh for security
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString("idToken", "$idToken");
+      log("✅ ID token cached successfully.");
+    } catch (e) {
+      log("❌ Failed to store ID token: $e");
+    }
+  }
+
   final TextEditingController _myController = TextEditingController();
   final TextEditingController _myController1 = TextEditingController();
   bool visibility = true;
   bool isButtonClicked = false;
   Map? userData;
   Map? responseData;
-  // bool user = true;
   User? user;
-  // bool emailExists = false;
-  // String? error;
-
-  // Future checkEmail(String email) async {
-  //   setState(() => error = null);
-  //   try {
-  //     // Check if the email exists
-  //     final checkResponse = await http.post(
-  //       Uri.parse(
-  //         "https://authbackend-production-d43e.up.railway.app/api/check-email/",
-  //       ),
-  //       headers: {'Content-Type': 'application/json'},
-  //       body: jsonEncode({'email': email}),
-  //     );
-
-  //     final checkJson = jsonDecode(checkResponse.body);
-  //     if (checkResponse.statusCode != 200 || checkJson['exists'] != true) {
-  //       setState(() => error = "No account found for this email.");
-  //       return;
-  //     } else {
-  //       setState(() {
-  //         emailExists = true;
-  //       });
-  //     }
-  //   } catch (e) {
-  //     setState(() => error = "Network error. Try again.");
-  //   }
-  // }
 
   bool emailExistsOnGoogle = false;
   String? error;
@@ -84,7 +69,6 @@ class _LoginState extends State<Login> {
       setState(() {
         _myController.text = email;
         _myController1.text = password;
-        // loginWithFirebase();
       });
     } else {
       return;
@@ -152,6 +136,7 @@ class _LoginState extends State<Login> {
 
       final UserCredential userCredential = await FirebaseAuth.instance
           .signInWithCredential(credential);
+      await storeFirebaseToken();
       final User? user = userCredential.user;
 
       if (user != null) {
@@ -214,42 +199,7 @@ class _LoginState extends State<Login> {
         ),
       );
 
-      setState(() {
-        // user = userData['role'] == 'User';
-      });
-      // if (userDetails['role'] != null ||
-      //     (userDetails['role'].toString()).isNotEmpty) {
-      //   Navigator.pushReplacement(
-      //     context,
-      //     MaterialPageRoute(
-      //       builder: (context) => RoleBasedHome(
-      //         role: (userDetails['role'].toString()).toLowerCase(),
-      //       ),
-      //     ),
-      //   );
-      // }
-      // if ((userDetails['role'].toString()).toLowerCase() == "" ||
-      //     (userDetails['role'].toString()).toLowerCase() == null) {
-      //   Navigator.pushReplacement(
-      //     context,
-      //     MaterialPageRoute(builder: (context) => const Roles()),
-      //   );
-      // } else if ((userDetails['role'].toString()).toLowerCase() == "admin") {
-      //   Navigator.pushReplacement(
-      //     context,
-      //     MaterialPageRoute(builder: (context) => const Admin()),
-      //   );
-      // } else if ((userDetails['role'].toString()).toLowerCase() == "Donor") {
-      //   Navigator.pushReplacement(
-      //     context,
-      //     MaterialPageRoute(builder: (context) => const DonorScreen()),
-      //   );
-      // } else if ((userDetails['role'].toString()).toLowerCase() == "victim") {
-      //   Navigator.pushReplacement(
-      //     context,
-      //     MaterialPageRoute(builder: (context) => const victimScreen()),
-      //   );
-      // }
+      setState(() {});
     } catch (e) {
       ScaffoldMessenger.of(
         context,
@@ -259,11 +209,6 @@ class _LoginState extends State<Login> {
 
   void loginWithFirebase() async {
     SharedPreferences _Pref = await SharedPreferences.getInstance();
-    // final QuerySnapshot snapshot = await FirebaseFirestore.instance
-    //     .collection("users")
-    //     .where('email', isEqualTo: _myController.text)
-    //     .limit(1)
-    //     .get();
 
     dynamic cache = _Pref.getString('Data');
 
@@ -298,6 +243,7 @@ class _LoginState extends State<Login> {
         email: _myController.text,
         password: _myController1.text,
       );
+      await storeFirebaseToken();
       final user = FirebaseAuth.instance.currentUser;
 
       if (user != null) {
@@ -308,7 +254,6 @@ class _LoginState extends State<Login> {
         //   'time': DateTime.now().toString(),
         // };
 
-        // final String? username = user.displayName;
         // Step 1: Get latest user data from API
         final response = await http.post(
           Uri.parse(

@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 import 'package:crisis_survivor/Screens/roleBasedNavigation.dart';
+import 'package:crisis_survivor/Widgets/shape.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -152,7 +153,7 @@ class _RolesState extends State<Roles> {
                 },
                 child: Image.asset("assets/Victim.png"),
               ),
-            ),
+            ),VictimShapeWidget(),
             SizedBox(
               height: height / 3,
               width: width / 1.6,

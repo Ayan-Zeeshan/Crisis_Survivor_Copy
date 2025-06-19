@@ -1,4 +1,4 @@
-// // ignore_for_file: file_names, camel_case_types, avoid_print, non_constant_identifier_names, no_leading_underscores_for_local_identifiers, use_build_context_synchronously
+// // ignore_for_file: file_names, camel_case_types, avoid_print, non_constant_identifier_names, no_leading_underscores_for_local_identifiers, use_build_context_synchronously, unused_local_variable, await_only_futures
 
 // import 'dart:convert';
 // import 'dart:developer' show log;
@@ -18,8 +18,6 @@
 // }
 
 // class _UsersState extends State<Users> {
-//   bool emailSent = false;
-//   bool canResend = false;
 //   String? error;
 //   String? requester_email = "";
 //   List<Map<String, dynamic>> users = [];
@@ -33,14 +31,71 @@
 //     });
 //   }
 
+//   Future<void> fetchUsersSecurely() async {
+//     final prefs = await SharedPreferences.getInstance();
+//     final user = FirebaseAuth.instance.currentUser;
+
+//     if (user == null) {
+//       log("No user logged in");
+//       return;
+//     }
+
+//     final uid = user.uid;
+//     final provider = user.providerData.first.providerId;
+
+//     String? idToken;
+//     String? password;
+
+//     // Retrieve idToken for all users
+//     // try {
+//     // idToken = await user.getIdToken(true); // Force refresh
+//     idToken = await prefs.getString('idToken');
+//     log(jsonDecode(idToken!));
+//     // } catch (e) {
+//     // log("Failed to get ID token: $e");
+//     //   return;
+//     // }
+
+//     // If you still want password-based login (manual fallback for Postman only)
+//     // In production, prefer just idToken everywhere.
+
+//     final uri = Uri.parse(
+//       "https://authbackend-production-d43e.up.railway.app/api/list-users/",
+//     );
+//     final response = await http.post(
+//       uri,
+//       headers: {'Content-Type': 'application/json'},
+//       body: jsonEncode({
+//         "uid": uid,
+//         "idToken": idToken, // For all users, especially Google ones
+//         // "password": password, // ⚠️ Only for Postman testing
+//       }),
+//     );
+
+//     if (response.statusCode == 200) {
+//       final data = json.decode(response.body);
+//       final usersList = data['users'] as List<dynamic>;
+//       setState(() {
+//         users = usersList.map((e) => Map<String, dynamic>.from(e)).toList();
+//         isLoading = false;
+//       });
+//     } else {
+//       final errorData = json.decode(response.body);
+//       log("Error fetching users: $errorData");
+//       setState(() {
+//         error = errorData['error'] ?? "Failed to fetch users";
+//         isLoading = false;
+//       });
+//     }
+//   }
+
 //   Future<void> loadRequesterEmail() async {
 //     SharedPreferences _pref = await SharedPreferences.getInstance();
-//     dynamic cache = _pref.getString('Data');
-
+//     final cache = _pref.getString('Data');
 //     if (cache != null && cache.isNotEmpty) {
-//       final Map<String, dynamic> cacheMap = json.decode(cache);
+//       final cacheMap = json.decode(cache) as Map<String, dynamic>;
 //       if (cacheMap.isNotEmpty) {
-//         requester_email = cacheMap['email'];
+//         requester_email = cacheMap['email'] as String?;
 //         log("Requester Email: $requester_email");
 //       } else {
 //         log("Cache is empty!");
@@ -51,20 +106,23 @@
 //   }
 
 //   Future<void> fetchUsersFromAPI() async {
+//     setState(() => isLoading = true);
 //     try {
 //       final response = await http.get(
 //         Uri.parse(
-//           "https://authbackend-production-d43e.up.railway.app/api/get-users/",
+//           "https://authbackend-production-d43e.up.railway.app/api/list-users/",
 //         ),
 //         headers: {'Content-Type': 'application/json'},
 //       );
 
 //       if (response.statusCode == 200) {
-//         final jsonData = json.decode(response.body);
-//         final List<dynamic> usersList = jsonData['users'];
+//         final jsonData = json.decode(response.body) as Map<String, dynamic>;
+//         final usersList = jsonData['users'] as List<dynamic>;
 
 //         setState(() {
-//           users = usersList.map((e) => Map<String, dynamic>.from(e)).toList();
+//           users = usersList
+//               .map((e) => Map<String, dynamic>.from(e as Map))
+//               .toList();
 //           isLoading = false;
 //         });
 //       } else {
@@ -93,8 +151,7 @@
 //           "email": emailToDelete,
 //         }),
 //       );
-
-//       final data = jsonDecode(response.body);
+//       final data = json.decode(response.body) as Map<String, dynamic>;
 
 //       if (response.statusCode == 200 && data['success'] == true) {
 //         ScaffoldMessenger.of(context).showSnackBar(
@@ -103,11 +160,9 @@
 //             duration: Duration(seconds: 3),
 //           ),
 //         );
-
-//         // If the admin deleted themselves, log them out and navigate to login
 //         if (emailToDelete == requester_email) {
 //           await FirebaseAuth.instance.signOut();
-//           SharedPreferences _pref = await SharedPreferences.getInstance();
+//           final _pref = await SharedPreferences.getInstance();
 //           await _pref.clear();
 //           Navigator.pushNamedAndRemoveUntil(
 //             context,
@@ -115,10 +170,10 @@
 //             (route) => false,
 //           );
 //         } else {
-//           fetchUsersFromAPI(); // Refresh user list
+//           fetchUsersFromAPI();
 //         }
 //       } else {
-//         error = data['error'] ?? "Something went wrong.";
+//         error = data['error'] as String? ?? "Something went wrong.";
 //         ScaffoldMessenger.of(context).showSnackBar(
 //           SnackBar(
 //             content: Text('User Deletion Failed: $error'),
@@ -128,13 +183,13 @@
 //       }
 //     } catch (e) {
 //       setState(() => error = "Something went wrong. Try again.");
-//       print('Failed to delete user: $e');
+//       log('Failed to delete user: $e');
 //     }
 //   }
 
 //   @override
 //   Widget build(BuildContext context) {
-//     double width = MediaQuery.of(context).size.width;
+//     final width = MediaQuery.of(context).size.width;
 
 //     return Scaffold(
 //       appBar: AppBar(
@@ -158,13 +213,12 @@
 //                 itemCount: users.length,
 //                 itemBuilder: (context, index) {
 //                   final data = users[index];
-//                   final email = data['email'] ?? "";
-//                   final userId =
-//                       data['uid'] ?? ""; // Django might return it as _id or id
+//                   final email = data['email'] as String? ?? "";
+//                   final userId = data['uid'] as String? ?? "";
 
 //                   return ListTile(
 //                     title: Text(
-//                       data['username'] ?? "",
+//                       data['username'] as String? ?? "",
 //                       style: GoogleFonts.roboto(
 //                         fontSize: width / 27,
 //                         fontWeight: FontWeight.w500,
@@ -181,7 +235,7 @@
 //                       mainAxisSize: MainAxisSize.min,
 //                       children: [
 //                         Text(
-//                           data['role'] ?? "Unassigned",
+//                           data['role'] as String? ?? "Unassigned",
 //                           style: const TextStyle(color: Colors.black),
 //                         ),
 //                         IconButton(
@@ -190,11 +244,9 @@
 //                             Navigator.push(
 //                               context,
 //                               MaterialPageRoute(
-//                                 builder: (context) => EditScreen(userId),
+//                                 builder: (_) => EditScreen(userId),
 //                               ),
-//                             ).then((_) {
-//                               fetchUsersFromAPI(); // Refresh list after editing
-//                             });
+//                             ).then((_) => fetchUsersFromAPI());
 //                           },
 //                         ),
 //                         IconButton(
@@ -212,7 +264,7 @@
 //     );
 //   }
 // }
-// ignore_for_file: file_names, camel_case_types, avoid_print, non_constant_identifier_names, no_leading_underscores_for_local_identifiers, use_build_context_synchronously
+// ignore_for_file: file_names, camel_case_types, avoid_print, non_constant_identifier_names, no_leading_underscores_for_local_identifiers, use_build_context_synchronously, unused_local_variable, await_only_futures
 
 import 'dart:convert';
 import 'dart:developer' show log;
@@ -240,8 +292,8 @@ class _UsersState extends State<Users> {
   @override
   void initState() {
     super.initState();
-    loadRequesterEmail().then((_) {
-      fetchUsersFromAPI();
+    loadRequesterEmail().then((value) {
+      fetchUsersFromAPI(); // Secure fetch included here
     });
   }
 
@@ -264,11 +316,36 @@ class _UsersState extends State<Users> {
   Future<void> fetchUsersFromAPI() async {
     setState(() => isLoading = true);
     try {
-      final response = await http.get(
+      final prefs = await SharedPreferences.getInstance();
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) {
+        log("No user logged in");
+        setState(() {
+          error = "User not logged in.";
+          isLoading = false;
+        });
+        return;
+      }
+
+      final uid = user.uid;
+      final idToken = await prefs.getString('idToken');
+
+      if (idToken == null) {
+        log("ID Token not found in cache");
+        setState(() {
+          error = "Authentication failed: No token.";
+          isLoading = false;
+        });
+        return;
+      }
+
+      final response = await http.post(
         Uri.parse(
           "https://authbackend-production-d43e.up.railway.app/api/list-users/",
         ),
         headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({"uid": uid, "idToken": idToken}),
       );
 
       if (response.statusCode == 200) {
@@ -276,18 +353,19 @@ class _UsersState extends State<Users> {
         final usersList = jsonData['users'] as List<dynamic>;
 
         setState(() {
-          users = usersList
-              .map((e) => Map<String, dynamic>.from(e as Map))
-              .toList();
+          users = usersList.map((e) => Map<String, dynamic>.from(e)).toList();
           isLoading = false;
         });
       } else {
+        final errorData = json.decode(response.body);
+        log("Error fetching users: $errorData");
         setState(() {
-          error = "Failed to load users from server.";
+          error = errorData['error'] ?? "Failed to fetch users";
           isLoading = false;
         });
       }
     } catch (e) {
+      log("Exception in fetchUsersFromAPI: $e");
       setState(() {
         error = "Network error occurred.";
         isLoading = false;
@@ -348,16 +426,16 @@ class _UsersState extends State<Users> {
     final width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "List of Users",
-          style: GoogleFonts.roboto(
-            fontWeight: FontWeight.w500,
-            fontSize: width / 20,
-          ),
-        ),
-        backgroundColor: const Color.fromARGB(255, 12, 226, 65),
-      ),
+      // appBar: AppBar(
+      //   title: Text(
+      //     "List of Users",
+      //     style: GoogleFonts.roboto(
+      //       fontWeight: FontWeight.w500,
+      //       fontSize: width / 20,
+      //     ),
+      //   ),
+      //   backgroundColor: const Color.fromARGB(255, 12, 226, 65),
+      // ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator(color: Colors.blue))
           : users.isEmpty
@@ -400,7 +478,7 @@ class _UsersState extends State<Users> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => EditScreen(userId),
+                                builder: (context) => EditScreen(userId),
                               ),
                             ).then((_) => fetchUsersFromAPI());
                           },

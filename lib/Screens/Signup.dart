@@ -1,5 +1,6 @@
 // ignore_for_file: camel_case_types, unused_local_variable, avoid_print, prefer_typing_uninitialized_variables, unnecessary_set_literal, no_leading_underscores_for_local_identifiers, unused_element, use_build_context_synchronously, file_names, sized_box_for_whitespace, deprecated_member_use, await_only_futures, strict_top_level_inference
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crisis_survivor/Screens/PrivacyPolicy.dart';
@@ -46,6 +47,20 @@ class _Sign_UpState extends State<Sign_Up> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), duration: Duration(seconds: 2)),
     );
+  }
+
+  Future<void> storeFirebaseToken() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      final idToken = await user.getIdToken(true); // Force refresh for security
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString("idToken", "$idToken");
+      log("✅ ID token cached successfully.");
+    } catch (e) {
+      log("❌ Failed to store ID token: $e");
+    }
   }
 
   void _setErrorColors({
@@ -141,7 +156,8 @@ class _Sign_UpState extends State<Sign_Up> {
           const SnackBar(content: Text('No account found. You can sign up.')),
         );
         signUpWithFirebase();
-        sendDatatoFireStore();
+        // storeFirebaseToken();
+        // sendDatatoFireStore();
       }
     } catch (e) {
       ScaffoldMessenger.of(
@@ -150,15 +166,16 @@ class _Sign_UpState extends State<Sign_Up> {
     }
   }
 
-  void signUpWithFirebase() {
+  void signUpWithFirebase() async {
     try {
       FirebaseAuth.instance
           .createUserWithEmailAndPassword(
             email: _myController2.text,
             password: _myController4.text,
           )
-          .then((value) {
-            sendDatatoFireStore(); // ✅ Move here: only after user is created
+          .then((value) async {
+            sendDatatoFireStore();
+            await storeFirebaseToken(); // ✅ Move here: only after user is created.
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Account Created Successfully!'),
@@ -208,90 +225,6 @@ class _Sign_UpState extends State<Sign_Up> {
     }
   }
 
-  // sendDatatoFireStore() async {
-  //   final _db = FirebaseFirestore.instance;
-
-  //   final dataList = {
-  //     "username": _myController.text,
-  //     "email": _myController2.text,
-  //     "role": null,
-  //     "time": DateTime.now().toString(),
-  //     "uid":
-  //   };
-
-  //   SharedPreferences _pref = await SharedPreferences.getInstance();
-  //   final checkResponse = await http.post(
-  //     Uri.parse(
-  //       "https://authbackend-production-d43e.up.railway.app/api/send-data/",
-  //     ),
-  //     headers: {'Content-Type': 'application/json'},
-  //     body: jsonEncode(dataList),
-  //   );
-  //   // Use Firebase Auth user UID as document ID
-  //   final user = FirebaseAuth.instance.currentUser;
-  //   if (user != null) {
-  //     await _db.collection("users").doc(user.uid).set(dataList);
-
-  //     await _pref.setString('Data', json.encode(dataList));
-  //   }
-
-  //   setState(() {});
-  // }
-
-  // Future<void> signInWithGoogle() async {
-  //   try {
-  //     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-  //     if (googleUser == null) return; // User cancelled
-
-  //     final GoogleSignInAuthentication googleAuth =
-  //         await googleUser.authentication;
-
-  //     final OAuthCredential credential = GoogleAuthProvider.credential(
-  //       accessToken: googleAuth.accessToken,
-  //       idToken: googleAuth.idToken,
-  //     );
-
-  //     final UserCredential userCredential = await FirebaseAuth.instance
-  //         .signInWithCredential(credential);
-
-  //     final User? user = userCredential.user;
-
-  //     if (user != null) {
-  //       final String? username = user.displayName;
-  //       final String? email = user.email;
-
-  //       final userData = {
-  //         'username': username,
-  //         'email': email,
-  //         'role': null,
-  //         'time': DateTime.now().toString(),
-  //       };
-
-  //       print(userData);
-
-  //       final SharedPreferences _prefs = await SharedPreferences.getInstance();
-  //       await _prefs.setString('Data', json.encode(userData));
-
-  //       // Save to Firestore if needed
-  //       await FirebaseFirestore.instance
-  //           .collection('users')
-  //           .doc(user.uid)
-  //           .set(userData);
-  //       Navigator.pushReplacement(
-  //         context,
-  //         MaterialPageRoute(builder: (context) => const Roles()),
-  //       );
-  //       ScaffoldMessenger.of(
-  //         context,
-  //       ).showSnackBar(SnackBar(content: Text('Signed in as $username')));
-  //     }
-  //   } catch (e) {
-  //     if (kDebugMode) print('Error signing in with Google: $e');
-  //     ScaffoldMessenger.of(
-  //       context,
-  //     ).showSnackBar(SnackBar(content: Text('Google Sign-In failed')));
-  //   }
-  // }
   sendDatatoFireStore() async {
     final _db = FirebaseFirestore.instance;
 
@@ -346,7 +279,7 @@ class _Sign_UpState extends State<Sign_Up> {
 
       final UserCredential userCredential = await FirebaseAuth.instance
           .signInWithCredential(credential);
-
+      await storeFirebaseToken();
       final User? user = userCredential.user;
 
       if (user != null) {
@@ -377,11 +310,6 @@ class _Sign_UpState extends State<Sign_Up> {
 
         final SharedPreferences _prefs = await SharedPreferences.getInstance();
         await _prefs.setString('Data', json.encode(cacheUserData));
-
-        // await FirebaseFirestore.instance
-        //     .collection('users')
-        //     .doc(user.uid)
-        //     .set(fullUserData);
 
         Navigator.pushReplacement(
           context,
