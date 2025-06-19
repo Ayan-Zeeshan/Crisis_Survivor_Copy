@@ -187,7 +187,7 @@ class _LoginState extends State<Login> {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Signed in as $username')));
-        if (role.isEmpty || role == Null) {
+        if (role == Null || role == "") {
           log('$userData');
           await _Pref.setString('Data', json.encode(userData));
           Navigator.pushReplacement(
@@ -334,7 +334,7 @@ class _LoginState extends State<Login> {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Signed in as $username')));
-        if (role.isEmpty || role == Null) {
+        if (role == Null || role == "") {
           log('$userData');
           await _Pref.setString('Data', json.encode(userData));
           Navigator.pushReplacement(
