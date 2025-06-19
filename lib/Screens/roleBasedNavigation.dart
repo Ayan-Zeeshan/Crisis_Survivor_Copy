@@ -64,9 +64,10 @@
 //     );
 //   }
 // }
-// ignore_for_file: file_names, use_build_context_synchronously
+// ignore_for_file: file_names, use_build_context_synchronously, unused_import, constant_pattern_never_matches_value_type
 import 'package:crisis_survivor/Admin/adminPage.dart';
 import 'package:crisis_survivor/Consultant/consultantscreen.dart';
+import 'package:crisis_survivor/Screens/BasicInfo.dart';
 import 'package:crisis_survivor/Victim/victimScreen.dart';
 import 'package:crisis_survivor/Donor/donorscreen.dart';
 import 'package:crisis_survivor/Screens/Roles.dart';
@@ -99,17 +100,21 @@ class _RoleBasedHomeState extends State<RoleBasedHome> {
     Widget destination;
 
     switch (role.toLowerCase()) {
+      case '':
+        destination = Roles();
+      case null:
+        destination = Roles();
       case 'donor':
-        destination = DonorScreen();
+        destination = BasicInfo(role: role);
         break;
       case 'victim':
-        destination = victimScreen();
+        destination = BasicInfo(role: role);
         break;
       case 'admin':
         destination = Admin();
         break;
       case 'consultant':
-        destination = ConsultantScreen();
+        destination = BasicInfo(role: role);
         break;
       default:
         destination = Roles(); // fallback

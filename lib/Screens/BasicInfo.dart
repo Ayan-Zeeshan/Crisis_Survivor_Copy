@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class BasicInfo extends StatefulWidget {
-  const BasicInfo({super.key});
+  final String role;
+  const BasicInfo({super.key, required this.role});
 
   @override
   State<BasicInfo> createState() => _BasicInfoState();
@@ -35,6 +36,6 @@ class _BasicInfoState extends State<BasicInfo> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: Column());
+    return Scaffold(backgroundColor: const Color(0xFFF2EDF6), body: Column(children: [],));
   }
 }
