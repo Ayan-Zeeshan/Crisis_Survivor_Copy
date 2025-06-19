@@ -37,12 +37,12 @@ class _RolesState extends State<Roles> {
         // Step 2: Update role
         userData['role'] = newRole;
         userData['time'] = DateTime.now().toString();
-        userData['uid'] = currentUser.uid;
 
         // Step 3: Save to cache
         await _pref.setString('Data', json.encode(userData));
 
         // Step 4: Push updated data back to Firestore using your API
+        userData['uid'] = currentUser.uid;
         await http.post(
           Uri.parse(
             "https://authbackend-production-d43e.up.railway.app/api/send-data/",
@@ -170,4 +170,3 @@ class _RolesState extends State<Roles> {
     );
   }
 }
-  

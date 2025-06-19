@@ -30,7 +30,7 @@ class _SplashSignUpState extends State<SplashSignUp> {
           !_controller.value.isPlaying) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => Sign_Up()), //MapPage()),
+          MaterialPageRoute(builder: (context) => Sign_Up()), //MapPage()),
         );
       }
     });

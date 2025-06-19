@@ -136,11 +136,14 @@
 //   }
 // }
 
+// ignore_for_file: non_constant_identifier_names, avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -166,6 +169,28 @@ class _MapPageState extends State<MapPage> {
   void initState() {
     super.initState();
     _getLocationName();
+    _Permissions();
+  }
+
+  Future<void> _Permissions() async {
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.location,
+      Permission.locationWhenInUse,
+    ].request();
+
+    bool allGranted = statuses.values.every((status) => status.isGranted);
+    if (!allGranted) {
+      print('Permissions not granted');
+      bool isPermanentlyDenied = statuses.values.any(
+        (status) => status.isPermanentlyDenied,
+      );
+      if (isPermanentlyDenied) {
+        print('Permissions permanently denied');
+        openAppSettings();
+      }
+    } else {
+      print('Permissions granted!');
+    }
   }
 
   Future<void> _getLocationName() async {

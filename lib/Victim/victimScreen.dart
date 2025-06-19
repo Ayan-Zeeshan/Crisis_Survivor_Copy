@@ -12,6 +12,12 @@ class victimScreen extends StatefulWidget {
 class _victimScreenState extends State<victimScreen> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(backgroundColor: const Color(0xFFF2EDF6));
+    return Scaffold(
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [Center(child: Text("Victim"))],
+      ),
+      backgroundColor: const Color(0xFFF2EDF6),
+    );
   }
 }

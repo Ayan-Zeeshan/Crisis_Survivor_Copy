@@ -723,8 +723,7 @@ class _LoginState extends State<Login> {
                 setState(() {
                   isButtonClicked = true;
                   if (_myController.text.isNotEmpty &&
-                      _myController1.text.isNotEmpty &&
-                      _myController.text.endsWith("@gmail.com")) {
+                      _myController1.text.isNotEmpty) {
                     color1 = Color.fromARGB(204, 0, 0, 0);
                     color2 = Color.fromARGB(204, 0, 0, 0);
                     bordercolor1 = Colors.white;

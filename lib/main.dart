@@ -236,7 +236,7 @@
 //   }
 // }
 
-// ignore_for_file: unnecessary_null_comparison, avoid_print, no_leading_underscores_for_local_identifiers, unrelated_type_equality_checks, non_constant_identifier_names
+// ignore_for_file: unnecessary_null_comparison, avoid_print, no_leading_underscores_for_local_identifiers, unrelated_type_equality_checks, non_constant_identifier_names, unused_import
 
 import 'dart:convert';
 import 'dart:developer';
@@ -267,27 +267,27 @@ class _MyAppState extends State<MyApp> {
   late Widget Screen;
 
   Future<void> _checkPermissionsAndPrefs() async {
-    Map<Permission, PermissionStatus> statuses = await [
-      Permission.camera,
-      Permission.storage,
-      Permission.mediaLibrary,
-      Permission.location,
-      Permission.locationWhenInUse,
-    ].request();
+    // Map<Permission, PermissionStatus> statuses = await [
+    //   Permission.camera,
+    //   Permission.storage,
+    //   Permission.mediaLibrary,
+    //   Permission.location,
+    //   Permission.locationWhenInUse,
+    // ].request();
 
-    bool allGranted = statuses.values.every((status) => status.isGranted);
-    if (!allGranted) {
-      print('Permissions not granted');
-      bool isPermanentlyDenied = statuses.values.any(
-        (status) => status.isPermanentlyDenied,
-      );
-      if (isPermanentlyDenied) {
-        print('Permissions permanently denied');
-        openAppSettings();
-      }
-    } else {
-      print('Permissions granted!');
-    }
+    // bool allGranted = statuses.values.every((status) => status.isGranted);
+    // if (!allGranted) {
+    //   print('Permissions not granted');
+    //   bool isPermanentlyDenied = statuses.values.any(
+    //     (status) => status.isPermanentlyDenied,
+    //   );
+    //   if (isPermanentlyDenied) {
+    //     print('Permissions permanently denied');
+    //     openAppSettings();
+    //   }
+    // } else {
+    //   print('Permissions granted!');
+    // }
 
     SharedPreferences _pref = await SharedPreferences.getInstance();
     String? dataString = _pref.getString('Data');
