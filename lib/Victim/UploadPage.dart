@@ -57,29 +57,6 @@ class _UploadPageState extends State<UploadPage> {
             onFileSelected: (f) => setState(() => onSelected(f)),
           ),
         ),
-        // if (file != null)
-        //   Padding(
-        //     padding: EdgeInsets.only(right: width / 20),
-        //     child: Column(
-        //       children: [
-        //         Icon(
-        //           Icons.check_circle_outline,
-        //           color: Colors.green,
-        //           size: width / 20,
-        //         ),
-        //         SizedBox(height: 4),
-        //         SizedBox(
-        //           width: width / 5,
-        //           child: Text(
-        //             path.basename(file.path),
-        //             style: TextStyle(fontSize: 8),
-        //             overflow: TextOverflow.ellipsis,
-        //             textAlign: TextAlign.center,
-        //           ),
-        //         ),
-        //       ],
-        //     ),
-        //   ),
       ],
     );
   }

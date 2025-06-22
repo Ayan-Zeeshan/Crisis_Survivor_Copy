@@ -17,6 +17,14 @@ class DonorBasicInfo extends StatefulWidget {
 class _DonorBasicInfoState extends State<DonorBasicInfo> {
   String? imageUrl;
   bool isButtonClicked = false;
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _contactNumberController =
+      TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _genderController = TextEditingController();
+  // TextEditingController _nameController5 = TextEditingController();
+  // Add these controllers and variables to your class:
+  String? selectedGender;
 
   final TextEditingController _dobController = TextEditingController();
   DateTime? _selectedDate;
@@ -59,13 +67,7 @@ class _DonorBasicInfoState extends State<DonorBasicInfo> {
 
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
-    TextEditingController _nameController = TextEditingController();
-    TextEditingController _contactNumberController = TextEditingController();
-    TextEditingController _emailController = TextEditingController();
-    TextEditingController _genderController = TextEditingController();
-    // TextEditingController _nameController5 = TextEditingController();
-    // Add these controllers and variables to your class:
-    String? selectedGender;
+
     setState(() {
       // if (widget.role == "donor") {
       //   labelText = "Donor";

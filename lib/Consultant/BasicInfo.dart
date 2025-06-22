@@ -1,6 +1,7 @@
 // ignore_for_file: unused_element, file_names, non_constant_identifier_names, avoid_print, no_leading_underscores_for_local_identifiers, unused_local_variable, unnecessary_null_comparison, unused_import, unused_field
 
 import 'dart:convert';
+import 'package:crisis_survivor/Consultant/consultantscreen.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -20,6 +21,14 @@ class _ConsultantBasicInfoState extends State<ConsultantBasicInfo> {
   // String? labelText;
   final TextEditingController _dobController = TextEditingController();
   DateTime? _selectedDate;
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _contactNumberController =
+      TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _genderController = TextEditingController();
+  // TextEditingController _nameController5 = TextEditingController();
+  // Add these controllers and variables to your class:
+  String? selectedGender;
 
   @override
   void dispose() {
@@ -59,13 +68,7 @@ class _ConsultantBasicInfoState extends State<ConsultantBasicInfo> {
 
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
-    TextEditingController _nameController = TextEditingController();
-    TextEditingController _contactNumberController = TextEditingController();
-    TextEditingController _emailController = TextEditingController();
-    TextEditingController _genderController = TextEditingController();
-    // TextEditingController _nameController5 = TextEditingController();
-    // Add these controllers and variables to your class:
-    String? selectedGender;
+
     // setState(() {
     //   if (widget.role == "donor") {
     //     labelText = "Donor";
@@ -615,10 +618,23 @@ class _ConsultantBasicInfoState extends State<ConsultantBasicInfo> {
                   final email = _emailController.text.trim();
                   final gender = selectedGender;
                   final dateOfBirth = _dobController.text;
-
+                  List details = [name, phone, email, gender, dateOfBirth];
                   // 🟥 Empty fields
-                  if ([name, email, gender, phone].any((e) => e!.isEmpty)) {
+                  bool flag = true;
+                  for (int i = 0; i < details.length; i++) {
+                    if (details[i] == null || details[i].isEmpty) {
+                      flag = false;
+                      break;
+                    } else {
+                      flag = true;
+                    }
+                  }
+                  if (flag) {
                     _showSnack("All fields are required!");
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => ConsultantScreen()),
+                    );
                     return;
                   }
                 },

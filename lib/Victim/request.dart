@@ -1,4 +1,7 @@
-// ignore_for_file: unused_field, unused_local_variable, no_leading_underscores_for_local_identifiers, unnecessary_import
+// ignore_for_file: unused_field, unused_local_variable, no_leading_underscores_for_local_identifiers, unnecessary_import, unused_import, duplicate_ignore
+
+// ignore: unused_import
+import 'dart:io';
 
 import 'package:crisis_survivor/Victim/victimScreen.dart';
 import 'package:crisis_survivor/Victim/UploadPage.dart';
@@ -6,6 +9,8 @@ import 'package:crisis_survivor/Widget/textField.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RequestPage extends StatefulWidget {
   const RequestPage({super.key});
@@ -26,6 +31,15 @@ class _RequestPageState extends State<RequestPage> {
   // final FocusNode _nameFocusNode = FocusNode();
   // final bool _isNameFocused = false;
   // String? selectedGender;
+
+  // readcache() async {
+  //   SharedPreferences _pref = await SharedPreferences.getInstance();
+  //   // _pref.getString('');
+  //   final cacheDir = await getTemporaryDirectory();
+  //   final cnicCard = File('${cacheDir.path}/cnic_card.png');
+  //   // await _pref;
+  // }
+
   bool isButtonClicked = false;
   bool isEditMode = false;
 
@@ -44,7 +58,7 @@ class _RequestPageState extends State<RequestPage> {
   String? selectedGender;
   String victimName = "John Doe";
   String phoneNumber = "03123456789";
-  String email = "john@example.com";
+  // String email = "john@example.com";
 
   @override
   Widget build(BuildContext context) {
@@ -147,16 +161,16 @@ class _RequestPageState extends State<RequestPage> {
               keyboardType: TextInputType.phone,
             ),
             SizedBox(height: width / 30.42),
-            BuildTextField(
-              width: width,
-              height: height,
-              isEditing: isEditing,
-              label: 'Email',
-              controller: _emailController,
-              defaultValue: email,
-            ),
-            SizedBox(height: width / 30.42),
 
+            // BuildTextField(
+            //   width: width,
+            //   height: height,
+            //   isEditing: isEditing,
+            //   label: 'Email',
+            //   controller: _emailController,
+            //   defaultValue: email,
+            // ),
+            // SizedBox(height: width / 30.42),
             SizedBox(
               width: (width / 1.15081081081),
               height: (height / 15),
@@ -418,9 +432,9 @@ class _RequestPageState extends State<RequestPage> {
 
                     final name = _nameController.text.trim();
                     final phone = _contactNumberController.text.trim();
-                    final email = _emailController.text.trim();
+                    // final email = _emailController.text.trim();
                     final gender = selectedGender;
-                    List details = [name, phone, email, gender];
+                    List details = [name, phone, gender];
                     bool flag = true;
                     for (int i = 0; i < details.length; i++) {
                       if (details[i] == null || details[i].isEmpty) {
