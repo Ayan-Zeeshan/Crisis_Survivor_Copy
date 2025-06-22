@@ -114,6 +114,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'package:crisis_survivor/Admin/adminPage.dart';
+import 'package:crisis_survivor/Donor/BasicInfo.dart';
+import 'package:crisis_survivor/Victim/sheltermap.dart';
 import 'package:crisis_survivor/Victim/victimScreen.dart';
 import 'package:crisis_survivor/Donor/donorscreen.dart';
 import 'package:crisis_survivor/Screens/Roles.dart';
@@ -190,7 +192,7 @@ class _Splash_ScreenState extends State<Splash_Screen> {
               context,
               MaterialPageRoute(
                 builder: (context) =>
-                    RoleBasedHome(role: role.toString().toLowerCase()),
+                    DonorBasicInfo(), // RoleBasedHome(role: role.toString().toLowerCase()),
               ),
             );
           } else {

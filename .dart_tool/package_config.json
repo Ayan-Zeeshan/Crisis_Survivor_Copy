@@ -80,6 +80,12 @@
       "languageVersion": "3.4"
     },
     {
+      "name": "cross_file",
+      "rootUri": "file:///C:/Users/ayanz/AppData/Local/Pub/Cache/hosted/pub.dev/cross_file-0.3.4+2",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
       "name": "crypto",
       "rootUri": "file:///C:/Users/ayanz/AppData/Local/Pub/Cache/hosted/pub.dev/crypto-3.0.6",
       "packageUri": "lib/",
@@ -144,6 +150,12 @@
       "rootUri": "file:///C:/Users/ayanz/AppData/Local/Pub/Cache/hosted/pub.dev/file-7.0.1",
       "packageUri": "lib/",
       "languageVersion": "3.0"
+    },
+    {
+      "name": "file_picker",
+      "rootUri": "file:///C:/Users/ayanz/AppData/Local/Pub/Cache/hosted/pub.dev/file_picker-10.2.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
     },
     {
       "name": "firebase_admin",
@@ -890,6 +902,12 @@
       "languageVersion": "3.3"
     },
     {
+      "name": "win32",
+      "rootUri": "file:///C:/Users/ayanz/AppData/Local/Pub/Cache/hosted/pub.dev/win32-5.14.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.8"
+    },
+    {
       "name": "x509",
       "rootUri": "file:///C:/Users/ayanz/AppData/Local/Pub/Cache/hosted/pub.dev/x509-0.2.4+3",
       "packageUri": "lib/",
@@ -911,6 +929,6 @@
   "generator": "pub",
   "generatorVersion": "3.8.1",
   "flutterRoot": "file:///C:/flutter",
-  "flutterVersion": "3.32.2",
+  "flutterVersion": "3.32.4",
   "pubCache": "file:///C:/Users/ayanz/AppData/Local/Pub/Cache"
 }

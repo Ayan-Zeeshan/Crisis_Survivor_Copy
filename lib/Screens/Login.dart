@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:developer';
 // import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crisis_survivor/Admin/adminPage.dart';
+import 'package:crisis_survivor/Donor/BasicInfo.dart';
 import 'package:crisis_survivor/Victim/victimScreen.dart';
 import 'package:crisis_survivor/Donor/donorscreen.dart';
 import 'package:crisis_survivor/Screens/ForgotPassword.dart';
@@ -185,8 +186,8 @@ class _LoginState extends State<Login> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) =>
-                  RoleBasedHome(role: role.toString().toLowerCase()),
+              builder: (context) => DonorBasicInfo(),
+              // RoleBasedHome(role: role.toString().toLowerCase()),
             ),
           );
         }
@@ -293,7 +294,7 @@ class _LoginState extends State<Login> {
             context,
             MaterialPageRoute(
               builder: (context) =>
-                  RoleBasedHome(role: role.toString().toLowerCase()),
+                  DonorBasicInfo(), // RoleBasedHome(role: role.toString().toLowerCase()),
             ),
           );
         }
@@ -348,18 +349,19 @@ class _LoginState extends State<Login> {
         child: Column(
           children: [
             SizedBox(
-              // width: width / 2.25,
               width: double.infinity,
-              height: height / 4.1, // just enough to cover the top background
+              height: height * 0.23, // just enough to cover the top background
               child: Stack(
                 children: [
                   // Darker big circle (Ellipse 2)
                   Positioned(
-                    top: -20,
-                    left: -100,
+                    top: //-20,
+                        width / -22,
+                    left: //-100,
+                        width / -4.15,
                     child: Container(
-                      width: 200,
-                      height: 180,
+                      width: height / 4.3,
+                      height: width / 2.3,
                       decoration: const BoxDecoration(
                         color: Color.fromARGB(
                           120,
@@ -374,11 +376,17 @@ class _LoginState extends State<Login> {
 
                   // Lighter overlapping circle (Ellipse 1)
                   Positioned(
-                    top: -100,
-                    left: -5,
+                    top: width / -4.15, //-100,
+                    left:
+                        //-5,
+                        width / -90,
                     child: Container(
-                      width: 180,
-                      height: 200,
+                      width: //98,
+                          // 180,
+                          width / 2.3,
+                      height: //98,
+                          // 200,
+                          height / 4.3,
                       decoration: const BoxDecoration(
                         color: Color.fromARGB(
                           145,
@@ -390,67 +398,10 @@ class _LoginState extends State<Login> {
                       ),
                     ),
                   ),
-                  // Positioned(
-                  //   top: width / 4.15, //100,
-                  //   left: width / 2.6000000001,
-                  //   //160,
-                  //   child: Text(
-                  //     "SIGN IN",
-                  //     style: GoogleFonts.poppins(
-                  //       fontSize: (width / 19.5),
-                  //       color: Colors.black,
-                  //       fontWeight: FontWeight.w700,
-                  //     ),
-                  //   ),
-                  // ),
-                  // // SizedBox(height: (width / 69.55)),)
-                  // Positioned(
-                  //   top: width / 3.3,
-                  //   // 110,
-                  //   left: width / 4.2,
-                  //   child: CircleAvatar(
-                  //     maxRadius: (width / 4.1577777),
-                  //     backgroundColor: const Color(0xFFF2EDF6),
-
-                  //     backgroundImage: const AssetImage(
-                  //       "assets/Profilepic2.png",
-                  //     ),
-                  //   ),
-                  // ),
                 ],
               ),
             ),
 
-            // SizedBox(height: (height / 350.22857142857)),
-            // Center(
-            //   child:
-            // SizedBox(
-            //   height: width / 2.1,
-            //   child: Stack(
-            //     children: [
-            //       Positioned(
-            //         left: 1.0,
-            //         top: 2.0,
-            //         child: Icon(
-            //           Icons.circle,
-            //           color: Colors.black54,
-            //           size: (width / 1.955),
-            //         ),
-            //       ),
-            //       Positioned(
-            //         right: 1.0,
-            //         top: 2.0,
-            //         child: Icon(
-            //           Icons.circle,
-            //           color: Colors.black45,
-            //           size: (width / 1.955),
-            //         ),
-            //       ),
-
-            //     ],
-            //   ),
-            // ),
-            // ),
             Center(
               child: Text(
                 "SIGN IN",
@@ -673,7 +624,11 @@ class _LoginState extends State<Login> {
                     color2 = Color.fromARGB(204, 0, 0, 0);
                     bordercolor1 = Colors.white;
                     bordercolor2 = Colors.white;
-                    loginWithFirebase();
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => Roles()),
+                    );
+                    // loginWithFirebase();
                   } else if (_myController.text.isEmpty &&
                       _myController1.text.isEmpty) {
                     color1 = Colors.red;
@@ -762,8 +717,6 @@ class _LoginState extends State<Login> {
                                 color: Color.fromARGB(253, 230, 230, 230),
                               ),
                             ),
-                            // shadowColor: Color.fromARGB(194, 86, 61, 61),
-                            // surfaceTintColor: Color.fromARGB(194, 86, 61, 61),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,

@@ -62,6 +62,10 @@ convert
 3.4
 file:///C:/Users/ayanz/AppData/Local/Pub/Cache/hosted/pub.dev/convert-3.1.2/
 file:///C:/Users/ayanz/AppData/Local/Pub/Cache/hosted/pub.dev/convert-3.1.2/lib/
+cross_file
+3.3
+file:///C:/Users/ayanz/AppData/Local/Pub/Cache/hosted/pub.dev/cross_file-0.3.4+2/
+file:///C:/Users/ayanz/AppData/Local/Pub/Cache/hosted/pub.dev/cross_file-0.3.4+2/lib/
 crypto
 3.4
 file:///C:/Users/ayanz/AppData/Local/Pub/Cache/hosted/pub.dev/crypto-3.0.6/
@@ -106,6 +110,10 @@ file
 3.0
 file:///C:/Users/ayanz/AppData/Local/Pub/Cache/hosted/pub.dev/file-7.0.1/
 file:///C:/Users/ayanz/AppData/Local/Pub/Cache/hosted/pub.dev/file-7.0.1/lib/
+file_picker
+3.4
+file:///C:/Users/ayanz/AppData/Local/Pub/Cache/hosted/pub.dev/file_picker-10.2.0/
+file:///C:/Users/ayanz/AppData/Local/Pub/Cache/hosted/pub.dev/file_picker-10.2.0/lib/
 firebase_admin
 2.12
 file:///C:/Users/ayanz/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_admin-0.3.0+2/
@@ -574,6 +582,10 @@ web_socket_channel
 3.3
 file:///C:/Users/ayanz/AppData/Local/Pub/Cache/hosted/pub.dev/web_socket_channel-3.0.3/
 file:///C:/Users/ayanz/AppData/Local/Pub/Cache/hosted/pub.dev/web_socket_channel-3.0.3/lib/
+win32
+3.8
+file:///C:/Users/ayanz/AppData/Local/Pub/Cache/hosted/pub.dev/win32-5.14.0/
+file:///C:/Users/ayanz/AppData/Local/Pub/Cache/hosted/pub.dev/win32-5.14.0/lib/
 x509
 3.0
 file:///C:/Users/ayanz/AppData/Local/Pub/Cache/hosted/pub.dev/x509-0.2.4+3/
@@ -584,8 +596,8 @@ file:///C:/Users/ayanz/AppData/Local/Pub/Cache/hosted/pub.dev/xdg_directories-1.
 file:///C:/Users/ayanz/AppData/Local/Pub/Cache/hosted/pub.dev/xdg_directories-1.1.0/lib/
 crisis_survivor
 3.8
-file:///C:/Users/ayanz/Desktop/Flutter/crisis_survivor/
-file:///C:/Users/ayanz/Desktop/Flutter/crisis_survivor/lib/
+file:///C:/Users/ayanz/Desktop/Flutter/Crisis_Survivor_Copy/crisis_survivor/
+file:///C:/Users/ayanz/Desktop/Flutter/Crisis_Survivor_Copy/crisis_survivor/lib/
 sky_engine
 3.7
 file:///C:/flutter/bin/cache/pkg/sky_engine/

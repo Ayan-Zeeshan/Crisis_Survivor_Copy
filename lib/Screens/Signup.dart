@@ -328,98 +328,18 @@ class _Sign_UpState extends State<Sign_Up> {
     }
   }
 
-  // Future<void> signInWithGoogleAndCacheUserData() async {
-  //   try {
-  //     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-  //     if (googleUser == null) return; // User canceled the sign-in
-
-  //     final GoogleSignInAuthentication googleAuth =
-  //         await googleUser.authentication;
-
-  //     final OAuthCredential credential = GoogleAuthProvider.credential(
-  //       accessToken: googleAuth.accessToken,
-  //       idToken: googleAuth.idToken,
-  //     );
-
-  //     final userCredential = await FirebaseAuth.instance.signInWithCredential(
-  //       credential,
-  //     );
-
-  //     final User? signedInUser = userCredential.user;
-
-  //     if (signedInUser != null) {
-  //       final String? username = signedInUser.displayName;
-  //       final String? email = signedInUser.email;
-
-  //       final userData = {
-  //         'username': username,
-  //         'email': email,
-  //         'role': 'victim',
-  //         'time': DateTime.now().toString(),
-  //       };
-
-  //       final SharedPreferences prefs = await SharedPreferences.getInstance();
-  //       await prefs.setString('Data', json.encode(userData));
-  //     }
-  //   } catch (e) {
-  //     if (kDebugMode) {
-  //       print('Google Sign-In or caching failed: $e');
-  //     }
-  //   }
-  // }
-
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
+    double height = MediaQuery.of(context).size.height;
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            // SizedBox(
-            //   height: (width / 9.22857142857),
-            // ),
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.center,
-            //   children: [
-            //     Center(
-            //       child: SizedBox(
-            //         height: width / 2.1,
-            //         child: Stack(
-            //           children: [
-            //             Positioned(
-            //               left: 1.0,
-            //               top: 2.0,
-            //               child: Icon(
-            //                 Icons.circle,
-            //                 color: Colors.black,
-            //                 size: (width / 1.955),
-            //               ),
-            //             ),
-            //             Positioned(
-            //               right: 1.0,
-            //               top: 2.0,
-            //               child: Icon(
-            //                 Icons.circle,
-            //                 color: Colors.black,
-            //                 size: (width / 1.955),
-            //               ),
-            //             ),
-            //             CircleAvatar(
-            //               maxRadius: (width / 4.1577777),
-            //               backgroundColor: Colors.white,
-            //               backgroundImage:
-            //                   const AssetImage("assets/forestech.png"),
-            //             ),
-            //           ],
-            //         ),
-            //       ),
-            //     ),
-            //   ],
-            // ),
             SizedBox(
               width: double.infinity,
-              height: 180, // just enough to cover the top background
+              height: height * 0.23, // just enough to cover the top background
               child: Stack(
                 children: [
                   // Darker big circle (Ellipse 2)
@@ -429,8 +349,8 @@ class _Sign_UpState extends State<Sign_Up> {
                     left: //-100,
                         width / -4.15,
                     child: Container(
-                      width: 200,
-                      height: 180,
+                      width: height / 4.3,
+                      height: width / 2.3,
                       decoration: const BoxDecoration(
                         color: Color.fromARGB(
                           120,
@@ -450,8 +370,12 @@ class _Sign_UpState extends State<Sign_Up> {
                         //-5,
                         width / -90,
                     child: Container(
-                      width: 180,
-                      height: 200,
+                      width: //98,
+                          // 180,
+                          width / 2.3,
+                      height: //98,
+                          // 200,
+                          height / 4.3,
                       decoration: const BoxDecoration(
                         color: Color.fromARGB(
                           145,
@@ -862,21 +786,6 @@ class _Sign_UpState extends State<Sign_Up> {
             ),
 
             SizedBox(height: (width / 10.4285714286)),
-            //             Center(
-            //               child: Container(
-            //                 height: width / 10,
-            //                 width: width / 1.2,
-            //                 child: Text(
-            //                   """By signing up you’re agree to our Terms & Condition
-            // and Privacy Policy.""",
-            //                   style: GoogleFonts.poppins(
-            //                     fontSize: width / 33,
-            //                     fontWeight: FontWeight.w500,
-            //                   ),
-            //                   textAlign: TextAlign.justify,
-            //                 ),
-            //               ),
-            //             ),
             Container(
               width: width / 1.2,
               height: width / 8,
@@ -946,7 +855,6 @@ class _Sign_UpState extends State<Sign_Up> {
                   setState(() => isButtonClicked = true);
 
                   final name = _myController.text.trim();
-                  final phone = _myController2.text.trim();
                   final email = _myController2.text.trim();
                   final pass = _myController3.text;
                   final confirmPass = _myController4.text;
@@ -985,7 +893,11 @@ class _Sign_UpState extends State<Sign_Up> {
 
                   // ✅ All Good → continue
                   _resetColors();
-                  checkIfAccountExistsAndRedirect(context, email);
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => Roles()),
+                  );
+                  // checkIfAccountExistsAndRedirect(context, email);
                 },
                 style: ElevatedButton.styleFrom(
                   fixedSize: Size(width / 1.12, width / 7.5),
