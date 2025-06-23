@@ -1,4 +1,3 @@
-
 // ignore_for_file: non_constant_identifier_names, avoid_print
 
 import 'dart:math';
@@ -18,6 +17,8 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   String locationName = '...';
+  GeoPoint? userGeoPoint;
+  double width = 360; // default fallback
 
   final MapController controller = MapController(
     initPosition: GeoPoint(latitude: 47.4358055, longitude: 8.4737324),
@@ -32,8 +33,10 @@ class _MapPageState extends State<MapPage> {
   @override
   void initState() {
     super.initState();
-    _getLocationName();
-    _Permissions();
+    Future.delayed(Duration(seconds: 2), () async {
+      await _Permissions();
+      await _getLocationName();
+    });
   }
 
   Future<void> _Permissions() async {
@@ -73,14 +76,14 @@ class _MapPageState extends State<MapPage> {
         );
       }
 
-      final userGeoPoint = GeoPoint(
+      userGeoPoint = GeoPoint(
         latitude: position.latitude,
         longitude: position.longitude,
       );
 
       List<Placemark> placemarks = await placemarkFromCoordinates(
-        userGeoPoint.latitude,
-        userGeoPoint.longitude,
+        userGeoPoint!.latitude,
+        userGeoPoint!.longitude,
       );
 
       if (placemarks.isNotEmpty) {
@@ -94,42 +97,24 @@ class _MapPageState extends State<MapPage> {
                   .toString();
         });
       } else {
-        GeoPoint center = await controller.centerMap;
-        List<Placemark> centerPlacemarks = await placemarkFromCoordinates(
-          center.latitude,
-          center.longitude,
-        );
-
-        if (centerPlacemarks.isNotEmpty) {
-          Placemark place = centerPlacemarks.first;
-          setState(() {
-            locationName =
-                (place.subLocality ??
-                        place.subAdministrativeArea ??
-                        place.locality ??
-                        "map center")
-                    .toString();
-          });
-        } else {
-          setState(() {
-            locationName = "map center";
-          });
-        }
+        setState(() {
+          locationName = "map center";
+        });
       }
 
-      await controller.moveTo(userGeoPoint);
+      await controller.moveTo(userGeoPoint!);
 
       final zoomLevel = (position.accuracy < 100) ? 15.0 : 11.0;
       await controller.setZoom(zoomLevel: zoomLevel);
 
       await controller.addMarker(
-        userGeoPoint,
+        userGeoPoint!,
         markerIcon: MarkerIcon(
-          icon: Icon(Icons.circle, color: Colors.blueAccent, size: 16),
+          icon: Icon(Icons.circle, color: Colors.blueAccent, size: width / 18),
         ),
       );
 
-      await _addNearbyShelters(userGeoPoint);
+      await _addNearbyShelters(userGeoPoint!);
     } catch (e) {
       setState(() {
         locationName = "Error";
@@ -139,44 +124,94 @@ class _MapPageState extends State<MapPage> {
 
   Future<void> _addNearbyShelters(GeoPoint userLocation) async {
     const int numberOfMarkers = 26;
-    const double maxDistanceKm = 100;
-    const double earthRadiusKm = 6371.0;
+    const double maxDistanceKm = 10;
+    const double earthRadius = 6371.0;
     final Random random = Random();
 
     for (int i = 0; i < numberOfMarkers; i++) {
-      double distanceKm = random.nextDouble() * maxDistanceKm;
-      double bearing = random.nextDouble() * 2 * pi;
+      final double distanceKm = random.nextDouble() * maxDistanceKm;
+      final double bearing = random.nextDouble() * 2 * pi;
 
-      double lat1 = userLocation.latitude * pi / 180;
-      double lon1 = userLocation.longitude * pi / 180;
+      final double lat1 = userLocation.latitude * pi / 180;
+      final double lon1 = userLocation.longitude * pi / 180;
 
-      double lat2 = asin(
-        sin(lat1) * cos(distanceKm / earthRadiusKm) +
-            cos(lat1) * sin(distanceKm / earthRadiusKm) * cos(bearing),
+      final double lat2 = asin(
+        sin(lat1) * cos(distanceKm / earthRadius) +
+            cos(lat1) * sin(distanceKm / earthRadius) * cos(bearing),
       );
-      double lon2 =
+
+      final double lon2 =
           lon1 +
           atan2(
-            sin(bearing) * sin(distanceKm / earthRadiusKm) * cos(lat1),
-            cos(distanceKm / earthRadiusKm) - sin(lat1) * sin(lat2),
+            sin(bearing) * sin(distanceKm / earthRadius) * cos(lat1),
+            cos(distanceKm / earthRadius) - sin(lat1) * sin(lat2),
           );
 
-      lat2 = lat2 * 180 / pi;
-      lon2 = lon2 * 180 / pi;
+      final double finalLat = lat2 * 180 / pi;
+      final double finalLon = lon2 * 180 / pi;
 
-      GeoPoint newPoint = GeoPoint(latitude: lat2, longitude: lon2);
+      final GeoPoint shelterLocation = GeoPoint(
+        latitude: finalLat,
+        longitude: finalLon,
+      );
 
       await controller.addMarker(
-        newPoint,
+        shelterLocation,
         markerIcon: MarkerIcon(
-          icon: Icon(Icons.home, color: Colors.green, size: 36),
+          iconWidget: GestureDetector(
+            onTap: () => _onShelterTapped(shelterLocation),
+            child: Icon(
+              Icons.location_on_sharp,
+              color: const Color.fromARGB(194, 86, 61, 61),
+              size: width / 4,
+            ),
+          ),
         ),
       );
     }
   }
 
+  void _onShelterTapped(GeoPoint shelterLocation) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Shelter"),
+          content: const Text(
+            "Would you like to see directions to this shelter?",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _showDirectionToShelter(shelterLocation);
+              },
+              child: const Text("Show Directions"),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text("Cancel"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showDirectionToShelter(GeoPoint shelterLocation) async {
+    if (userGeoPoint == null) return;
+
+    await controller.drawRoad(
+      userGeoPoint!,
+      shelterLocation,
+      roadType: RoadType.car,
+      roadOption: const RoadOption(roadColor: Colors.deepOrange, roadWidth: 8),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    width = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -199,15 +234,15 @@ class _MapPageState extends State<MapPage> {
             stepZoom: 1.0,
           ),
           userLocationMarker: UserLocationMaker(
-            personMarker: const MarkerIcon(
+            personMarker: MarkerIcon(
               icon: Icon(
-                Icons.location_history_rounded,
-                color: Colors.red,
-                size: 48,
+                Icons.my_location_rounded,
+                color: Colors.blue,
+                size: width * 2,
               ),
             ),
-            directionArrowMarker: const MarkerIcon(
-              icon: Icon(Icons.double_arrow, size: 48),
+            directionArrowMarker:MarkerIcon(
+              icon: Icon(Icons.double_arrow, size: width / 2),
             ),
           ),
           roadConfiguration: const RoadOption(roadColor: Colors.yellowAccent),

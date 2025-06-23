@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'dart:developer';
 // import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crisis_survivor/Admin/adminPage.dart';
-import 'package:crisis_survivor/Donor/BasicInfo.dart';
+import 'package:crisis_survivor/Consultant/BasicInfo.dart';
 import 'package:crisis_survivor/Victim/victimScreen.dart';
 import 'package:crisis_survivor/Donor/donorscreen.dart';
 import 'package:crisis_survivor/Screens/ForgotPassword.dart';
@@ -76,6 +76,34 @@ class _LoginState extends State<Login> {
     }
   }
 
+  Future<void> fetchAndCacheUserData(User? user) async {
+    if (user == null) return;
+
+    try {
+      final response = await http.post(
+        Uri.parse(
+          "https://authbackend-production-d43e.up.railway.app/api/receive-data/",
+        ),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({"uid": user.uid}),
+      );
+
+      if (response.statusCode == 200) {
+        final prefs = await SharedPreferences.getInstance();
+        final responseData = json.decode(response.body);
+        final userData = responseData['data'];
+        if (userData != null) {
+          await prefs.setString('Data', json.encode(userData));
+          log("✅ Cached user data: $userData");
+        }
+      } else {
+        log("❌ Failed to fetch user data. Status: ${response.statusCode}");
+      }
+    } catch (e) {
+      log("❌ Error fetching user data: $e");
+    }
+  }
+
   Future checkEmail(String email, [String? provider]) async {
     setState(() => error = null);
     try {
@@ -127,80 +155,37 @@ class _LoginState extends State<Login> {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
       if (googleUser == null) return; // user cancelled
-      SharedPreferences _Pref = await SharedPreferences.getInstance();
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-      final OAuthCredential credential = GoogleAuthProvider.credential(
+
+      final googleAuth = await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      final UserCredential userCredential = await FirebaseAuth.instance
-          .signInWithCredential(credential);
-      await storeFirebaseToken();
+      final userCredential = await FirebaseAuth.instance.signInWithCredential(
+        credential,
+      );
       final User? user = userCredential.user;
 
-      if (user != null) {
-        // final cacheUserData = {
-        //   'username': username,
-        //   'email': email,
-        //   'role': null,
-        //   'time': DateTime.now().toString(),
-        // };
-
-        final String? username = user.displayName;
-        // Step 1: Get latest user data from API
-        final response = await http.post(
-          Uri.parse(
-            "https://authbackend-production-d43e.up.railway.app/api/receive-data/",
-          ),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({"uid": user.uid}),
-        );
-
-        if (response.statusCode == 200) {
-          //Map<String, dynamic>
-          responseData = json.decode(response.body);
-          //Map<String, dynamic>
-          userData = responseData!['data'];
-        } else {
-          print("❌ Failed to fetch user data from backend");
-        }
-
-        // Step 2: Update role
-        final role = userData!['role'];
-
+      if (user == null) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Signed in as $username')));
-        if (role == Null || role == "") {
-          log('$userData');
-          await _Pref.setString('Data', json.encode(userData));
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const Roles()),
-          );
-        } else {
-          log('$userData');
-          await _Pref.setString('Data', json.encode(userData));
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => DonorBasicInfo(),
-              // RoleBasedHome(role: role.toString().toLowerCase()),
-            ),
-          );
-        }
+        ).showSnackBar(const SnackBar(content: Text('Google Sign-In failed')));
+        return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Signed in with Google'),
-          duration: Duration(seconds: 2),
-        ),
+      // Immediate redirection
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const Roles()),
       );
 
-      setState(() {});
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Signed in as ${user.displayName}')),
+      );
+
+      // Run this silently in background
+      Future.wait([storeFirebaseToken(), fetchAndCacheUserData(user)]);
     } catch (e) {
       ScaffoldMessenger.of(
         context,
@@ -209,96 +194,15 @@ class _LoginState extends State<Login> {
   }
 
   void loginWithFirebase() async {
-    SharedPreferences _Pref = await SharedPreferences.getInstance();
-
-    dynamic cache = _Pref.getString('Data');
-
-    if (cache != null && cache.isNotEmpty) {
-      final Map<String, dynamic> cacheMap = json.decode(cache);
-      if (cacheMap.isNotEmpty) {
-        log(cacheMap.toString());
-      } else {
-        log("Cache is empty!");
-      }
-    } else {
-      log("Cache is empty!");
-    }
-
     try {
-      // List<String> signInMethods = await FirebaseAuth.instance
-      //     .fetchSignInMethodsForEmail(_myController.text);
-      await checkEmail(_myController.text, 'google.com');
-      if (emailExistsOnGoogle) {
-        // If user signed up with Google, prompt Google Sign-In instead
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please sign in using Google'),
-            duration: Duration(seconds: 3),
-          ),
-        );
-        await signInWithGoogle(); // call the reusable method below
-        return;
-      }
+      final email = _myController.text.trim();
+      final password = _myController1.text.trim();
 
+      // Attempt login immediately (no email check upfront)
       final Signin = await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _myController.text,
-        password: _myController1.text,
+        email: email,
+        password: password,
       );
-      await storeFirebaseToken();
-      final user = FirebaseAuth.instance.currentUser;
-
-      if (user != null) {
-        // final cacheUserData = {
-        //   'username': username,
-        //   'email': email,
-        //   'role': null,
-        //   'time': DateTime.now().toString(),
-        // };
-
-        // Step 1: Get latest user data from API
-        final response = await http.post(
-          Uri.parse(
-            "https://authbackend-production-d43e.up.railway.app/api/receive-data/",
-          ),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({"uid": user.uid}),
-        );
-
-        if (response.statusCode == 200) {
-          //Map<String, dynamic>
-          responseData = json.decode(response.body);
-          //Map<String, dynamic>
-          // cacheUserData = json.encode(responseData);
-          userData = responseData!['data'];
-        } else {
-          print("❌ Failed to fetch user data from backend");
-        }
-
-        // Step 2: Update role
-        final role = userData!['role'];
-        final username = userData!['username'];
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Signed in as $username')));
-        if (role == Null || role == "") {
-          log('$userData');
-          await _Pref.setString('Data', json.encode(userData));
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const Roles()),
-          );
-        } else {
-          log('$userData');
-          await _Pref.setString('Data', json.encode(userData));
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  DonorBasicInfo(), // RoleBasedHome(role: role.toString().toLowerCase()),
-            ),
-          );
-        }
-      }
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -307,30 +211,24 @@ class _LoginState extends State<Login> {
         ),
       );
 
-      // if (snapshot.docs.isNotEmpty) {
-      //   final DocumentSnapshot data = snapshot.docs.first;
-      //   final Map userDetails = {
-      //     'username': data['username'],
-      //     'email': data['email'],
-      //     'role': data['role'],
-      //     'time': DateTime.now().toString(),
-      //   };
-      setState(() {
-        // if (data['role'] == 'User') {
-        //   user = true;
-        // } else if (data['role'] == 'Admin') {
-        //   user = false;
-        // }
-      }); //.then((value) {
-      //   Navigator.pushReplacement(
-      //     context,
-      //     MaterialPageRoute(builder: (context) => const Roles()),
-      //   );
-      // });
+      final user = FirebaseAuth.instance.currentUser;
+
+      // Immediately redirect, don't wait for backend work
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const Roles()),
+      );
+
+      // Do all slow work *after* user is in
+      Future.wait([storeFirebaseToken(), fetchAndCacheUserData(user)]);
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(e.message ?? "Login failed")));
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Unexpected error: $e")));
     }
   }
 
@@ -349,19 +247,18 @@ class _LoginState extends State<Login> {
         child: Column(
           children: [
             SizedBox(
+              // width: width / 2.25,
               width: double.infinity,
-              height: height * 0.23, // just enough to cover the top background
+              height: height / 4.1, // just enough to cover the top background
               child: Stack(
                 children: [
                   // Darker big circle (Ellipse 2)
                   Positioned(
-                    top: //-20,
-                        width / -22,
-                    left: //-100,
-                        width / -4.15,
+                    top: -20,
+                    left: -100,
                     child: Container(
-                      width: height / 4.3,
-                      height: width / 2.3,
+                      width: 200,
+                      height: 180,
                       decoration: const BoxDecoration(
                         color: Color.fromARGB(
                           120,
@@ -376,17 +273,11 @@ class _LoginState extends State<Login> {
 
                   // Lighter overlapping circle (Ellipse 1)
                   Positioned(
-                    top: width / -4.15, //-100,
-                    left:
-                        //-5,
-                        width / -90,
+                    top: -100,
+                    left: -5,
                     child: Container(
-                      width: //98,
-                          // 180,
-                          width / 2.3,
-                      height: //98,
-                          // 200,
-                          height / 4.3,
+                      width: 180,
+                      height: 200,
                       decoration: const BoxDecoration(
                         color: Color.fromARGB(
                           145,
@@ -595,12 +486,6 @@ class _LoginState extends State<Login> {
                       context: context,
                       builder: (context) => ForgotPasswordDialog(),
                     ),
-                    // ScaffoldMessenger.of(context).showSnackBar(
-                    //   const SnackBar(
-                    //     content: Text('Coming Soon!'),
-                    //     duration: Duration(seconds: 3),
-                    //   ),
-                    // ),
                     child: Text(
                       "Forgot Password?",
                       style: GoogleFonts.poppins(
@@ -624,11 +509,7 @@ class _LoginState extends State<Login> {
                     color2 = Color.fromARGB(204, 0, 0, 0);
                     bordercolor1 = Colors.white;
                     bordercolor2 = Colors.white;
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => Roles()),
-                    );
-                    // loginWithFirebase();
+                    loginWithFirebase();
                   } else if (_myController.text.isEmpty &&
                       _myController1.text.isEmpty) {
                     color1 = Colors.red;
@@ -717,6 +598,8 @@ class _LoginState extends State<Login> {
                                 color: Color.fromARGB(253, 230, 230, 230),
                               ),
                             ),
+                            // shadowColor: Color.fromARGB(194, 86, 61, 61),
+                            // surfaceTintColor: Color.fromARGB(194, 86, 61, 61),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -760,25 +643,6 @@ class _LoginState extends State<Login> {
                 ),
               ],
             ),
-            // SizedBox(height: (width / 20.55)),
-            // RichText(
-            //   children: Text(
-            //     "New here ",
-            //     style: GoogleFonts.poppins(
-            //       color: Colors.black,
-            //       fontSize: (width / 30.5714285714),
-            //       fontWeight: FontWeight.w400,
-            //     ),
-            //   ),
-            // ),
-            // Text(
-            //   " ?",
-            //   style: GoogleFonts.poppins(
-            //     color: Colors.black,
-            //     fontSize: (width / 30.5714285714),
-            //     fontWeight: FontWeight.w400,
-            //   ),
-            // ),
             SizedBox(height: height / 25),
             RichText(
               text: TextSpan(
@@ -810,83 +674,35 @@ class _LoginState extends State<Login> {
                 ],
               ),
             ),
-            // SizedBox(height: (width / 20.55)),
-            // TextButton(
-            //   onPressed: () {
-            //     Navigator.push(
-            //       context,
-            //       MaterialPageRoute(builder: (context) => const Sign_Up()),
-            //     );
-            //   },
-            //   child: Text(
-            //     "Sign up",
-            //     style: GoogleFonts.montserrat(
-            //       fontSize: (width / 21.5),
-            //       fontWeight: FontWeight.w500,
-            //       color: Colors.black,
-            //     ),
-            //   ),
-            // ),
-            // SizedBox(height: (width / 20.55)),
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.center,
-            //   children: [
-            //     Text(
-            //       "\"",
-            //       style: GoogleFonts.pacifico(
-            //         fontSize: (width / 22.55),
-            //         fontWeight: FontWeight.w500,
-            //         fontStyle: FontStyle.italic,
-            //         color: const Color.fromARGB(255, 22, 116, 22),
-            //       ),
-            //     ),
-            //     Text(
-            //       "Empowering",
-            //       style: GoogleFonts.pacifico(
-            //         color: const Color.fromARGB(255, 22, 116, 22),
-            //         fontSize: (width / 22.55),
-            //         fontStyle: FontStyle.italic,
-            //         fontWeight: FontWeight.w500,
-            //       ),
-            //     ),
-            //     Text(
-            //       " Nature's",
-            //       style: GoogleFonts.pacifico(
-            //         color: const Color.fromARGB(255, 121, 57, 5),
-            //         fontSize: (width / 22.55),
-            //         fontStyle: FontStyle.italic,
-            //         fontWeight: FontWeight.w500,
-            //       ),
-            //     ),
-            //   ],
-            // ),
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.center,
-            //   children: [
-            //     Text(
-            //       " Future",
-            //       style: GoogleFonts.pacifico(
-            //         color: const Color.fromARGB(255, 22, 116, 22),
-            //         fontSize: (width / 22.55),
-            //         fontStyle: FontStyle.italic,
-            //         fontWeight: FontWeight.w500,
-            //       ),
-            //     ),
-            //     Text(
-            //       "\"",
-            //       style: GoogleFonts.pacifico(
-            //         color: const Color.fromARGB(255, 22, 116, 22),
-            //         fontSize: (width / 22.55),
-            //         fontStyle: FontStyle.italic,
-            //         fontWeight: FontWeight.w500,
-            //       ),
-            //     ),
-            //   ],
-            // ),
           ],
         ),
       ),
       backgroundColor: Color(0xFFF2EDF6),
     );
+  }
+}
+
+Future<void> fetchAndCacheUserData(User? user) async {
+  if (user == null) return;
+
+  try {
+    final response = await http.post(
+      Uri.parse(
+        "https://authbackend-production-d43e.up.railway.app/api/receive-data/",
+      ),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({"uid": user.uid}),
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      final userData = responseData['data'];
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('Data', json.encode(userData));
+    } else {
+      print("❌ Failed to fetch user data from backend");
+    }
+  } catch (e) {
+    print("❌ Exception during fetch: $e");
   }
 }

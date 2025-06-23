@@ -4,13 +4,14 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:crisis_survivor/Consultant/BasicInfo.dart';
 import 'package:crisis_survivor/Consultant/consultantscreen.dart';
-import 'package:crisis_survivor/Donor/BasicInfo.dart';
+import 'package:crisis_survivor/Donor/donate.dart';
 import 'package:crisis_survivor/Screens/Roles.dart';
 import 'package:crisis_survivor/Screens/Signup.dart';
 import 'package:crisis_survivor/Screens/splash_signup.dart';
 import 'package:crisis_survivor/Screens/Splash_Screen.dart';
 import 'package:crisis_survivor/Victim/BasicInfo.dart';
 import 'package:crisis_survivor/Victim/request.dart';
+import 'package:crisis_survivor/Victim/sheltermap.dart';
 import 'package:crisis_survivor/Victim/victimScreen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -71,11 +72,12 @@ class _MyAppState extends State<MyApp> {
         await _pref.clear();
       } catch (e) {
         log("Error during user validation: $e");
-        Screen = Splash_Screen(); // fallback screen on error
+        Screen = MapPage();
+        //Splash_Screen(); // fallback screen on error
       }
     } else {
       log("No cached data found.");
-      Screen = ConsultantScreen();
+      Screen = MapPage(); //ConsultantScreen();
       //Sign_Up();
       //SplashSignUp(); // fallback if no cache
     }

@@ -114,7 +114,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'package:crisis_survivor/Admin/adminPage.dart';
+import 'package:crisis_survivor/Consultant/BasicInfo.dart';
 import 'package:crisis_survivor/Donor/BasicInfo.dart';
+import 'package:crisis_survivor/Victim/BasicInfo.dart';
 import 'package:crisis_survivor/Victim/sheltermap.dart';
 import 'package:crisis_survivor/Victim/victimScreen.dart';
 import 'package:crisis_survivor/Donor/donorscreen.dart';
@@ -188,13 +190,33 @@ class _Splash_ScreenState extends State<Splash_Screen> {
           final role = userDetails['role'];
           log(role);
           if (role != null && role.toString().isNotEmpty) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) =>
-                    DonorBasicInfo(), // RoleBasedHome(role: role.toString().toLowerCase()),
-              ),
-            );
+            if (role == "donor") {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      DonorBasicInfo(), // RoleBasedHome(role: role.toString().toLowerCase()),
+                ),
+              );
+            }
+            if (role == "victim") {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      VictimBasicInfo(), // RoleBasedHome(role: role.toString().toLowerCase()),
+                ),
+              );
+            }
+            if (role == "consultant") {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      ConsultantBasicInfo(), // RoleBasedHome(role: role.toString().toLowerCase()),
+                ),
+              );
+            }
           } else {
             Navigator.pushReplacement(
               context,

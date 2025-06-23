@@ -22,8 +22,6 @@ class _DonorBasicInfoState extends State<DonorBasicInfo> {
       TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _genderController = TextEditingController();
-  // TextEditingController _nameController5 = TextEditingController();
-  // Add these controllers and variables to your class:
   String? selectedGender;
 
   final TextEditingController _dobController = TextEditingController();
@@ -68,18 +66,7 @@ class _DonorBasicInfoState extends State<DonorBasicInfo> {
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
 
-    setState(() {
-      // if (widget.role == "donor") {
-      //   labelText = "Donor";
-      // }
-      // if (widget.role == "consultant") {
-      //   labelText = "Consultant";
-      // }
-      // if (widget.role == "victim") {
-      //   labelText = "Victim";
-      // }
-      // labelText = widget.role;
-    });
+    setState(() {});
     return Scaffold(
       backgroundColor: const Color(0xFFF2EDF6),
       body: SingleChildScrollView(

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:developer';
 
 class ConsultantBasicInfo extends StatefulWidget {
   const ConsultantBasicInfo({super.key});
@@ -586,7 +587,6 @@ class _ConsultantBasicInfoState extends State<ConsultantBasicInfo> {
                             "${pickedDate.day.toString().padLeft(2, '0')}/"
                             "${pickedDate.month.toString().padLeft(2, '0')}/"
                             "${pickedDate.year}";
-
                         setState(() {}); // Just to trigger UI update, if needed
                       }
                     },
@@ -623,17 +623,24 @@ class _ConsultantBasicInfoState extends State<ConsultantBasicInfo> {
                   bool flag = true;
                   for (int i = 0; i < details.length; i++) {
                     if (details[i] == null || details[i].isEmpty) {
+                      // log(details[i]);
                       flag = false;
+                      // log("$flag");
                       break;
                     } else {
+                      // log(details[i]);
                       flag = true;
+                      // log("$flag");
                     }
                   }
-                  if (flag) {
+                  // log("flag");
+                  if (flag!=true) {
                     _showSnack("All fields are required!");
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => ConsultantScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => ConsultantScreen(),
+                      ),
                     );
                     return;
                   }
