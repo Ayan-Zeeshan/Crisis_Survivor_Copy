@@ -77,7 +77,9 @@ class _MyAppState extends State<MyApp> {
       }
     } else {
       log("No cached data found.");
-      Screen = MapPage(); //ConsultantScreen();
+      Screen =
+          //MapPage();
+          ConsultantScreen();
       //Sign_Up();
       //SplashSignUp(); // fallback if no cache
     }

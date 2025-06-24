@@ -70,18 +70,6 @@ class _ConsultantBasicInfoState extends State<ConsultantBasicInfo> {
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
 
-    // setState(() {
-    //   if (widget.role == "donor") {
-    //     labelText = "Donor";
-    //   }
-    //   if (widget.role == "consultant") {
-    //     labelText = "Consultant";
-    //   }
-    //   if (widget.role == "victim") {
-    //     labelText = "Victim";
-    //   }
-    //   // labelText = widget.role;
-    // });
     return Scaffold(
       backgroundColor: const Color(0xFFF2EDF6),
       body: SingleChildScrollView(
