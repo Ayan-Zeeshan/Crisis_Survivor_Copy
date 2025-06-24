@@ -21,24 +21,6 @@ class RequestPage extends StatefulWidget {
 
 class _RequestPageState extends State<RequestPage> {
   bool isEditing = false;
-  // final TextEditingController _nameController = TextEditingController();
-  // final TextEditingController _contactNumberController =
-  //     TextEditingController();
-  // final TextEditingController _emailController = TextEditingController();
-  // final TextEditingController _bankNameController = TextEditingController();
-  // final TextEditingController _bankAccountController = TextEditingController();
-  // final TextEditingController _branchCodeController = TextEditingController();
-  // final FocusNode _nameFocusNode = FocusNode();
-  // final bool _isNameFocused = false;
-  // String? selectedGender;
-
-  // readcache() async {
-  //   SharedPreferences _pref = await SharedPreferences.getInstance();
-  //   // _pref.getString('');
-  //   final cacheDir = await getTemporaryDirectory();
-  //   final cnicCard = File('${cacheDir.path}/cnic_card.png');
-  //   // await _pref;
-  // }
 
   bool isButtonClicked = false;
   bool isEditMode = false;
@@ -162,15 +144,6 @@ class _RequestPageState extends State<RequestPage> {
             ),
             SizedBox(height: width / 30.42),
 
-            // BuildTextField(
-            //   width: width,
-            //   height: height,
-            //   isEditing: isEditing,
-            //   label: 'Email',
-            //   controller: _emailController,
-            //   defaultValue: email,
-            // ),
-            // SizedBox(height: width / 30.42),
             SizedBox(
               width: (width / 1.15081081081),
               height: (height / 15),
@@ -221,25 +194,6 @@ class _RequestPageState extends State<RequestPage> {
 
             ElevatedButton(
               onPressed: () {
-                // showDialog(
-                //   context: context,
-                //   builder: (_) => AlertDialog(
-                //     title: Text("All Documents"),
-                //     content: Column(
-                //       mainAxisSize: MainAxisSize.min,
-                //       children: [
-                //         Image.asset("assets/doc1.png"),
-                //         Image.asset("assets/doc2.png"),
-                //       ],
-                //     ),
-                //     actions: isEditing
-                //         ? [
-                //             TextButton(onPressed: () {}, child: Text("Edit")),
-                //             TextButton(onPressed: () {}, child: Text("Delete")),
-                //           ]
-                //         : [],
-                //   ),
-                // );
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => UploadPage()),
@@ -374,26 +328,15 @@ class _RequestPageState extends State<RequestPage> {
                   ),
                 );
               },
-              child:
-                  //  Row(
-                  //   children: [
-                  //     Icon(
-                  //       Icons.camera_alt_outlined,
-                  //       color: Colors.black,
-                  //       size: width / 15,
-                  //     ),
-                  //     SizedBox(width: width / 65),
-                  Text(
-                    "Bank Details",
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
-                      fontSize: width / 28,
-                    ),
-                  ),
-              //   ],
-              // ),
+              child: Text(
+                "Bank Details",
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
+                  fontSize: width / 28,
+                ),
+              ),
             ),
             SizedBox(height: width / 15),
             Row(

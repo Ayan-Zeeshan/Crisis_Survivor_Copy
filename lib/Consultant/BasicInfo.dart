@@ -1,10 +1,13 @@
-// ignore_for_file: unused_element, file_names, non_constant_identifier_names, avoid_print, no_leading_underscores_for_local_identifiers, unused_local_variable, unnecessary_null_comparison, unused_import, unused_field
+// ignore_for_file: unused_element, file_names, non_constant_identifier_names, avoid_print, no_leading_underscores_for_local_identifiers, unused_local_variable, unnecessary_null_comparison, unused_import, unused_field, use_build_context_synchronously
 
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:crisis_survivor/Consultant/consultantscreen.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:developer';
@@ -19,6 +22,11 @@ class ConsultantBasicInfo extends StatefulWidget {
 class _ConsultantBasicInfoState extends State<ConsultantBasicInfo> {
   String? imageUrl;
   bool isButtonClicked = false;
+  bool isFileUploaded = false;
+  // Add this variable at the top of your State class:
+  PlatformFile? _uploadedFile;
+  Uint8List? _uploadedImageBytes;
+
   // String? labelText;
   final TextEditingController _dobController = TextEditingController();
   DateTime? _selectedDate;
@@ -139,282 +147,34 @@ class _ConsultantBasicInfoState extends State<ConsultantBasicInfo> {
               ),
             ),
             SizedBox(height: (width / 7.4285714286)),
-            // SizedBox(height: (width / 25.4285714286)),
-            SizedBox(
-              width: (width / 1.15081081081),
-              height: (width / 8),
-              child: TextField(
-                controller: _nameController,
-                style: GoogleFonts.poppins(
-                  fontSize: width / 36,
-                  fontWeight: FontWeight.w400,
-                  color: Color.fromARGB(204, 0, 0, 0),
-                ),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Color.fromARGB(
-                    41,
-                    217,
-                    217,
-                    217,
-                  ), // Keep background transparent
-                  labelText: _nameController.text.isEmpty && isButtonClicked
-                      ? 'Consultant Name  (required):'
-                      : 'Consultant Name:',
-                  labelStyle: GoogleFonts.poppins(
-                    color: _nameController.text.isEmpty && isButtonClicked
-                        ? Colors.red
-                        : Colors.black,
-                    fontSize: width / 36,
-                    fontWeight: FontWeight.w400,
-                  ),
-                  hintText: 'Enter your name',
-                  hintStyle: GoogleFonts.poppins(
-                    color: _nameController.text.isEmpty && isButtonClicked
-                        ? Colors.red
-                        : Colors.black,
-                    fontSize: width / 36,
-                    fontWeight: FontWeight.w400,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(width / 1.9),
-                    ),
-                    borderSide: BorderSide(
-                      color: _nameController.text.isEmpty && isButtonClicked
-                          ? Colors.red
-                          : Color.fromARGB(
-                              41,
-                              217,
-                              217,
-                              217,
-                            ), //Color.fromARGB(255, 6, 117, 34),
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(width / 1.9),
-                    ),
-                    borderSide: BorderSide(
-                      color: _nameController.text.isEmpty && isButtonClicked
-                          ? Colors.red
-                          : Color.fromARGB(
-                              41,
-                              217,
-                              217,
-                              217,
-                            ), //Color.fromARGB(255, 6, 117, 34),
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(width / 1.9),
-                    ),
-                    borderSide: BorderSide(
-                      color: _nameController.text.isEmpty && isButtonClicked
-                          ? Colors.red
-                          : Color.fromARGB(
-                              41,
-                              217,
-                              217,
-                              217,
-                            ), //Color.fromARGB(255, 6, 117, 34),
-                    ),
-                  ),
-                  errorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(width / 1.9),
-                    ),
-                    borderSide: BorderSide(
-                      color: _nameController.text.isEmpty && isButtonClicked
-                          ? Colors.red
-                          : Color.fromARGB(
-                              41,
-                              217,
-                              217,
-                              217,
-                            ), //Color.fromARGB(255, 6, 117, 34),
-                    ),
-                  ),
-                ),
-              ),
-            ),
 
-            SizedBox(height: (width / 30.4285714286)),
-            SizedBox(
-              width: (width / 1.15081081081),
-              height: (width / 8),
-              child: TextField(
-                style: GoogleFonts.poppins(
-                  fontSize: width / 36,
-                  fontWeight: FontWeight.w400,
-                  color: Color.fromARGB(204, 0, 0, 0),
-                ),
-                decoration: InputDecoration(
-                  fillColor: Color.fromARGB(41, 217, 217, 217),
-                  filled: true,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(width / 1.9),
-                    ),
-                    borderSide: BorderSide(
-                      color:
-                          _contactNumberController.text.isEmpty &&
-                              isButtonClicked
-                          ? Colors.red
-                          : Color.fromARGB(
-                              41,
-                              217,
-                              217,
-                              217,
-                            ), //Color.fromARGB(255, 6, 117, 34),
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(width / 1.9),
-                    ),
-                    borderSide: BorderSide(
-                      color:
-                          _contactNumberController.text.isEmpty &&
-                              isButtonClicked
-                          ? Colors.red
-                          : Color.fromARGB(41, 217, 217, 217),
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(width / 1.9),
-                    ),
-                    borderSide: BorderSide(
-                      color:
-                          _contactNumberController.text.isEmpty &&
-                              isButtonClicked
-                          ? Colors.red
-                          : Color.fromARGB(41, 217, 217, 217),
-                    ),
-                  ),
-                  errorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(width / 1.9),
-                    ),
-                    borderSide: BorderSide(
-                      color:
-                          _contactNumberController.text.isEmpty &&
-                              isButtonClicked
-                          ? Colors.red
-                          : Color.fromARGB(41, 217, 217, 217),
-                    ),
-                  ),
-                  enabled: true,
-                  labelText:
-                      _contactNumberController.text.isEmpty && isButtonClicked
-                      ? 'Phone Number (Required):'
-                      : 'Phone Number:',
-                  labelStyle: GoogleFonts.poppins(
-                    color:
-                        _contactNumberController.text.isEmpty && isButtonClicked
-                        ? Colors.red
-                        : Colors.black,
-                    fontSize: width / 36,
-                    fontWeight: FontWeight.w400,
-                  ),
-                  hintText: 'Enter your contact number',
-                  hintStyle: GoogleFonts.poppins(
-                    color:
-                        _contactNumberController.text.isEmpty && isButtonClicked
-                        ? Colors.red
-                        : Colors.black,
-                    fontSize: width / 36,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-                controller: _contactNumberController,
-              ),
+            buildCustomTextField(
+              width: width,
+              controller: _nameController,
+              isButtonClicked: isButtonClicked,
+              label: "Consultant Name",
+              hint: "Enter your name",
             ),
-            SizedBox(height: (width / 30.4285714286)),
-            SizedBox(
-              width: (width / 1.15081081081),
-              height: (width / 8),
-              child: TextField(
-                style: GoogleFonts.poppins(
-                  fontSize: width / 36,
-                  fontWeight: FontWeight.w400,
-                  color: Color.fromARGB(204, 0, 0, 0),
-                ),
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(width / 1.9),
-                    ),
-                    borderSide: BorderSide(
-                      color: _emailController.text.isEmpty && isButtonClicked
-                          ? Colors.red
-                          : Color.fromARGB(41, 217, 217, 217),
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(width / 1.9),
-                    ),
-                    borderSide: BorderSide(
-                      color:
-                          _emailController.text.isEmpty &&
-                              isButtonClicked &&
-                              isButtonClicked
-                          ? Colors.red
-                          : Color.fromARGB(41, 217, 217, 217),
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(width / 1.9),
-                    ),
-                    borderSide: BorderSide(
-                      color:
-                          _emailController.text.isEmpty &&
-                              isButtonClicked &&
-                              isButtonClicked
-                          ? Colors.red
-                          : Color.fromARGB(41, 217, 217, 217),
-                    ),
-                  ),
-                  errorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(width / 1.9),
-                    ),
-                    borderSide: BorderSide(
-                      color: _emailController.text.isEmpty && isButtonClicked
-                          ? Colors.red
-                          : Color.fromARGB(41, 217, 217, 217),
-                    ),
-                  ),
-                  filled: true,
-                  fillColor: Color.fromARGB(41, 217, 217, 217),
-                  enabled: true,
-                  labelText: _emailController.text.isEmpty && isButtonClicked
-                      ? 'Email (Required):'
-                      : 'Email:',
-                  labelStyle: GoogleFonts.poppins(
-                    color: _emailController.text.isEmpty && isButtonClicked
-                        ? Colors.red
-                        : Colors.black,
-                    fontSize: width / 36,
-                    fontWeight: FontWeight.w400,
-                  ),
-                  hintText: 'Enter your email',
-                  hintStyle: GoogleFonts.poppins(
-                    color: _emailController.text.isEmpty && isButtonClicked
-                        ? Colors.red
-                        : Colors.black,
-                    fontSize: width / 36,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-                controller: _emailController,
-              ),
+            SizedBox(height: width / 30.4285714286),
+
+            buildCustomTextField(
+              width: width,
+              controller: _contactNumberController,
+              isButtonClicked: isButtonClicked,
+              label: "Phone Number",
+              hint: "Enter your contact number",
             ),
-            SizedBox(height: (width / 30.4285714286)),
+            SizedBox(height: width / 30.4285714286),
+
+            buildCustomTextField(
+              width: width,
+              controller: _emailController,
+              isButtonClicked: isButtonClicked,
+              label: "Email",
+              hint: "Enter your email",
+            ),
+            SizedBox(height: width / 30.4285714286),
+
             SizedBox(
               width: (width / 1.15081081081),
               height: (width / 9),
@@ -483,7 +243,6 @@ class _ConsultantBasicInfoState extends State<ConsultantBasicInfo> {
 
             SizedBox(height: (width / 30.4285714286)),
 
-            // DOB FIELD WITH FIXED CALENDAR & FORMATTING
             SizedBox(
               width: (width / 1.15081081081),
               height: (width / 9),
@@ -557,18 +316,6 @@ class _ConsultantBasicInfoState extends State<ConsultantBasicInfo> {
                         firstDate: DateTime(0),
                         lastDate: DateTime.now(),
                       );
-                      // log("$pickedDate");
-                      // if (pickedDate != null) {
-                      //   setState(() {
-                      //     _selectedDate = pickedDate;
-                      //     _dobController.text =
-                      //         "${_selectedDate!.day.toString().padLeft(2, '0')}/"
-                      //         "${_selectedDate!.month.toString().padLeft(2, '0')}/"
-                      //         "${_selectedDate!.year}";
-                      //   });
-                      // }
-                      // log("$_selectedDate");
-                      // log("${_dobController.text}");
                       if (pickedDate != null) {
                         _selectedDate = pickedDate;
                         _dobController.text =
@@ -601,36 +348,84 @@ class _ConsultantBasicInfoState extends State<ConsultantBasicInfo> {
                 onPressed: () async {
                   setState(() => isButtonClicked = true);
 
+                  SharedPreferences _cachedData;
+                  String? dataString;
+                  Map<String, dynamic>? data;
+
                   final name = _nameController.text.trim();
                   final phone = _contactNumberController.text.trim();
                   final email = _emailController.text.trim();
                   final gender = selectedGender;
-                  final dateOfBirth = _dobController.text;
-                  List details = [name, phone, email, gender, dateOfBirth];
-                  // 🟥 Empty fields
-                  bool flag = true;
-                  for (int i = 0; i < details.length; i++) {
-                    if (details[i] == null || details[i].isEmpty) {
-                      // log(details[i]);
-                      flag = false;
-                      // log("$flag");
-                      break;
-                    } else {
-                      // log(details[i]);
-                      flag = true;
-                      // log("$flag");
-                    }
-                  }
-                  // log("flag");
-                  if (flag!=true) {
+                  final dateOfBirth = _dobController.text.trim();
+
+                  if (name.isEmpty ||
+                      phone.isEmpty ||
+                      email.isEmpty ||
+                      gender == null ||
+                      dateOfBirth.isEmpty) {
                     _showSnack("All fields are required!");
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ConsultantScreen(),
-                      ),
-                    );
                     return;
+                  }
+
+                  try {
+                    final user = FirebaseAuth.instance.currentUser;
+
+                    if (user == null) {
+                      _showSnack("Not logged in!");
+                      _cachedData = await SharedPreferences.getInstance();
+                      dataString = _cachedData.getString('Data');
+
+                      if (dataString != null) {
+                        data = json.decode(dataString);
+                        log("$data");
+                      }
+                      return;
+                    }
+
+                    final uid = user.uid;
+
+                    _cachedData = await SharedPreferences.getInstance();
+                    dataString = _cachedData.getString('Data');
+
+                    if (dataString == null) {
+                      _showSnack("User role not found in local storage.");
+                      return;
+                    }
+
+                    data = json.decode(dataString);
+                    final role = data!['role'];
+
+                    final body = {
+                      "uid": uid,
+                      "role": role,
+                      "name": name,
+                      "phone_number": phone,
+                      "email": email,
+                      "gender": gender,
+                      "date_of_birth": dateOfBirth,
+                    };
+
+                    final response = await http.post(
+                      Uri.parse(
+                        "https://authbackend-production-d43e.up.railway.app/api/send-info/",
+                      ),
+                      headers: {"Content-Type": "application/json"},
+                      body: jsonEncode(body),
+                    );
+
+                    if (response.statusCode == 200) {
+                      _showSnack("Information saved!");
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ConsultantScreen(),
+                        ),
+                      );
+                    } else {
+                      _showSnack("Server error: ${response.body}");
+                    }
+                  } catch (e) {
+                    _showSnack("Error: $e");
                   }
                 },
                 style: ElevatedButton.styleFrom(
@@ -658,44 +453,110 @@ class _ConsultantBasicInfoState extends State<ConsultantBasicInfo> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 SizedBox(width: width * 0.06),
-                SizedBox(
-                  child: GestureDetector(
+                if (_uploadedImageBytes == null) ...[
+                  SizedBox(
+                    child: GestureDetector(
+                      onTap: () async {
+                        final result = await FilePicker.platform.pickFiles(
+                          type: FileType.custom,
+                          allowedExtensions: ['jpg', 'jpeg', 'png'],
+                          withData: true,
+                        );
+                        if (result != null) {
+                          setState(() {
+                            _uploadedFile = result.files.first;
+                            _uploadedImageBytes = result.files.first.bytes;
+                          });
+                        }
+                      },
+                      child: CameraIconWidget(size: width * 0.12),
+                    ),
+                  ),
+                  GestureDetector(
                     onTap: () async {
                       final result = await FilePicker.platform.pickFiles(
                         type: FileType.custom,
                         allowedExtensions: ['jpg', 'jpeg', 'png'],
+                        withData: true,
                       );
                       if (result != null) {
                         setState(() {
-                          // imageUrl = result.files.first.path;
+                          _uploadedFile = result.files.first;
+                          _uploadedImageBytes = result.files.first.bytes;
                         });
                       }
                     },
-                    child: CameraIconWidget(size: width * 0.12),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () async {
-                    final result = await FilePicker.platform.pickFiles(
-                      type: FileType.custom,
-                      allowedExtensions: ['jpg', 'jpeg', 'png'],
-                    );
-                    if (result != null) {
-                      setState(() {
-                        // imageUrl = result.files.first.path;
-                      });
-                    }
-                  },
-                  child: Text(
-                    "CLICK TO UPLOAD \n DEGREE AND LICENSE",
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.poppins(
-                      color: Colors.black,
-                      fontWeight: FontWeight.w800,
-                      fontSize: width * 0.06,
+                    child: Text(
+                      "CLICK TO UPLOAD \n DEGREE AND LICENSE",
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.poppins(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w800,
+                        fontSize: width * 0.06,
+                      ),
                     ),
                   ),
-                ),
+                ] else ...[
+                  Column(
+                    children: [
+                      GestureDetector(
+                        onTap: () async {
+                          final result = await FilePicker.platform.pickFiles(
+                            type: FileType.custom,
+                            allowedExtensions: ['jpg', 'jpeg', 'png'],
+                            withData: true,
+                          );
+                          if (result != null) {
+                            setState(() {
+                              _uploadedFile = result.files.first;
+                              _uploadedImageBytes = result.files.first.bytes;
+                            });
+                          }
+                        },
+                        child: Container(
+                          width: width * 0.35,
+                          height: width * 0.35,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.black26),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.memory(
+                              _uploadedImageBytes!,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      GestureDetector(
+                        onTap: () async {
+                          final result = await FilePicker.platform.pickFiles(
+                            type: FileType.custom,
+                            allowedExtensions: ['jpg', 'jpeg', 'png'],
+                            withData: true,
+                          );
+                          if (result != null) {
+                            setState(() {
+                              _uploadedFile = result.files.first;
+                              _uploadedImageBytes = result.files.first.bytes;
+                            });
+                          }
+                        },
+                        child: Text(
+                          _uploadedFile!.name,
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.poppins(
+                            fontSize: width * 0.035,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
                 SizedBox(width: width * 0.07),
               ],
             ),
@@ -720,4 +581,62 @@ class CameraIconWidget extends StatelessWidget {
       fit: BoxFit.contain,
     );
   }
+}
+
+Widget buildCustomTextField({
+  required double width,
+  required TextEditingController controller,
+  required bool isButtonClicked,
+  required String label,
+  required String hint,
+}) {
+  final bool isEmpty = controller.text.isEmpty && isButtonClicked;
+  final borderColor = isEmpty
+      ? Colors.red
+      : const Color.fromARGB(41, 217, 217, 217);
+
+  return SizedBox(
+    width: width / 1.15081081081,
+    height: width / 8,
+    child: TextField(
+      controller: controller,
+      style: GoogleFonts.poppins(
+        fontSize: width / 36,
+        fontWeight: FontWeight.w400,
+        color: const Color.fromARGB(204, 0, 0, 0),
+      ),
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: const Color.fromARGB(41, 217, 217, 217),
+        labelText: isEmpty ? "$label (Required):" : "$label:",
+        labelStyle: GoogleFonts.poppins(
+          color: isEmpty ? Colors.red : Colors.black,
+          fontSize: width / 36,
+          fontWeight: FontWeight.w400,
+        ),
+        hintText: hint,
+        hintStyle: GoogleFonts.poppins(
+          color: isEmpty ? Colors.red : Colors.black,
+          fontSize: width / 36,
+          fontWeight: FontWeight.w400,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(width / 1.9)),
+          borderSide: BorderSide(color: borderColor),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(width / 1.9)),
+          borderSide: BorderSide(color: borderColor),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(width / 1.9)),
+          borderSide: BorderSide(color: borderColor),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(width / 1.9)),
+          borderSide: BorderSide(color: borderColor),
+        ),
+      ),
+    ),
+  );
 }

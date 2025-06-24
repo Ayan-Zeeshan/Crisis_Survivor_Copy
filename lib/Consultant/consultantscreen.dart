@@ -1,6 +1,5 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'package:crisis_survivor/Consultant/BasicInfo.dart';
 import 'package:crisis_survivor/auth_guard.dart';
 import 'package:flutter/material.dart';
 
@@ -21,7 +20,7 @@ class _ConsultantScreenState extends State<ConsultantScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ConsultantBasicInfo(),
+      body: Column(children: []),
       backgroundColor: const Color(0xFFF2EDF6),
     );
   }

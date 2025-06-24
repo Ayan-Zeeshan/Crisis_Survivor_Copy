@@ -1,23 +1,14 @@
-// ignore_for_file: unnecessary_null_comparison, avoid_print, no_leading_underscores_for_local_identifiers, unrelated_type_equality_checks, non_constant_identifier_names, unused_import
+// ignore_for_file: unnecessary_null_comparison, avoid_print, no_leading_underscores_for_local_identifiers, unrelated_type_equality_checks, non_constant_identifier_names
 
 import 'dart:convert';
 import 'dart:developer';
 import 'package:crisis_survivor/Consultant/BasicInfo.dart';
-import 'package:crisis_survivor/Consultant/consultantscreen.dart';
-import 'package:crisis_survivor/Donor/donate.dart';
-import 'package:crisis_survivor/Screens/Roles.dart';
-import 'package:crisis_survivor/Screens/Signup.dart';
 import 'package:crisis_survivor/Screens/splash_signup.dart';
 import 'package:crisis_survivor/Screens/Splash_Screen.dart';
-import 'package:crisis_survivor/Victim/BasicInfo.dart';
-import 'package:crisis_survivor/Victim/request.dart';
-import 'package:crisis_survivor/Victim/sheltermap.dart';
-import 'package:crisis_survivor/Victim/victimScreen.dart';
+import 'package:crisis_survivor/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:crisis_survivor/firebase_options.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -35,17 +26,19 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late Widget Screen;
+  late Widget screen = const Scaffold(
+    body: Center(child: CircularProgressIndicator()),
+  );
 
   Future<void> _checkPermissionsAndPrefs() async {
-    SharedPreferences _pref = await SharedPreferences.getInstance();
-    String? dataString = _pref.getString('Data');
-    if (dataString != null && dataString.isNotEmpty) {
-      try {
+    try {
+      SharedPreferences _pref = await SharedPreferences.getInstance();
+      String? dataString = _pref.getString('Data');
+
+      if (dataString != null && dataString.isNotEmpty) {
         Map<String, dynamic> cache = json.decode(dataString);
         log("Cached Data: $cache");
 
-        // ✅ Call Django API using UID to verify user
         final currentUser = FirebaseAuth.instance.currentUser;
 
         if (currentUser != null) {
@@ -60,29 +53,35 @@ class _MyAppState extends State<MyApp> {
           if (response.statusCode == 200) {
             final decoded = json.decode(response.body);
             if (decoded['data'] != null) {
-              log("Navigation = true");
-              Screen = Splash_Screen(); // Navigate to splash screen
+              log("✅ Navigation: Splash_Screen()");
+              screen = const ConsultantBasicInfo(); //Splash_Screen();
               return;
             }
           }
         }
 
-        log("Navigation = false");
-        Screen = SplashSignUp();
+        log("❌ Invalid or expired user. Clearing prefs.");
         await _pref.clear();
-      } catch (e) {
-        log("Error during user validation: $e");
-        Screen = MapPage();
-        //Splash_Screen(); // fallback screen on error
+      } else {
+        log("📭 No cached data found.");
       }
-    } else {
-      log("No cached data found.");
-      Screen =
-          //MapPage();
-          ConsultantScreen();
-      //Sign_Up();
-      //SplashSignUp(); // fallback if no cache
+
+      screen = const SplashSignUp();
+    } catch (e) {
+      log("⚠️ Error during user validation: $e");
+      screen = const SplashSignUp();
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _initialize();
+  }
+
+  Future<void> _initialize() async {
+    await _checkPermissionsAndPrefs();
+    if (mounted) setState(() {});
   }
 
   @override
@@ -91,32 +90,8 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       title: 'Crisis Survivor',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: FutureBuilder<void>(
-        future: _checkPermissionsAndPrefs(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(
-              body: Center(
-                child: CircleAvatar(
-                  radius: 70,
-                  backgroundImage: AssetImage('assets/splash.png'),
-                ),
-              ),
-            );
-          } else if (snapshot.hasError) {
-            return const Scaffold(
-              body: Center(
-                child: Text(
-                  'Error requesting permissions: Permission Required!',
-                ),
-              ),
-            );
-          } else {
-            return Scaffold(body: Screen);
-          }
-        },
-      ),
-      color: Colors.black, //const Color(0xFFF2EDF6),
+      home: screen,
+      color: Colors.black,
     );
   }
 }

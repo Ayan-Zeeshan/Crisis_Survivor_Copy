@@ -5,6 +5,9 @@ import 'dart:developer';
 // import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crisis_survivor/Admin/adminPage.dart';
 import 'package:crisis_survivor/Consultant/BasicInfo.dart';
+import 'package:crisis_survivor/Consultant/consultantscreen.dart';
+import 'package:crisis_survivor/Donor/BasicInfo.dart';
+import 'package:crisis_survivor/Victim/BasicInfo.dart';
 import 'package:crisis_survivor/Victim/victimScreen.dart';
 import 'package:crisis_survivor/Donor/donorscreen.dart';
 import 'package:crisis_survivor/Screens/ForgotPassword.dart';
@@ -89,18 +92,15 @@ class _LoginState extends State<Login> {
       );
 
       if (response.statusCode == 200) {
-        final prefs = await SharedPreferences.getInstance();
         final responseData = json.decode(response.body);
         final userData = responseData['data'];
-        if (userData != null) {
-          await prefs.setString('Data', json.encode(userData));
-          log("✅ Cached user data: $userData");
-        }
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('Data', json.encode(userData));
       } else {
-        log("❌ Failed to fetch user data. Status: ${response.statusCode}");
+        print("❌ Failed to fetch user data from backend");
       }
     } catch (e) {
-      log("❌ Error fetching user data: $e");
+      print("❌ Exception during fetch: $e");
     }
   }
 
@@ -174,17 +174,11 @@ class _LoginState extends State<Login> {
         return;
       }
 
-      // Immediate redirection
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const Roles()),
-      );
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Signed in as ${user.displayName}')),
       );
 
-      // Run this silently in background
+      _redirectBasedOnRole(user);
       Future.wait([storeFirebaseToken(), fetchAndCacheUserData(user)]);
     } catch (e) {
       ScaffoldMessenger.of(
@@ -198,8 +192,7 @@ class _LoginState extends State<Login> {
       final email = _myController.text.trim();
       final password = _myController1.text.trim();
 
-      // Attempt login immediately (no email check upfront)
-      final Signin = await FirebaseAuth.instance.signInWithEmailAndPassword(
+      final signin = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -212,15 +205,10 @@ class _LoginState extends State<Login> {
       );
 
       final user = FirebaseAuth.instance.currentUser;
-
-      // Immediately redirect, don't wait for backend work
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const Roles()),
-      );
-
-      // Do all slow work *after* user is in
-      Future.wait([storeFirebaseToken(), fetchAndCacheUserData(user)]);
+      if (user != null) {
+        _redirectBasedOnRole(user);
+        Future.wait([storeFirebaseToken(), fetchAndCacheUserData(user)]);
+      }
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(
         context,
@@ -230,6 +218,75 @@ class _LoginState extends State<Login> {
         context,
       ).showSnackBar(SnackBar(content: Text("Unexpected error: $e")));
     }
+  }
+
+  void _redirectBasedOnRole(User user) async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString('Data');
+    if (raw == null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (c) => const Roles()),
+      );
+      return;
+    }
+
+    final data = json.decode(raw);
+    final role = data['role']?.toString().toLowerCase();
+    final uid = user.uid;
+
+    try {
+      final response = await http.post(
+        Uri.parse(
+          "https://authbackend-production-d43e.up.railway.app/api/receive-info/",
+        ),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({"uid": uid, "role": role}),
+      );
+
+      if (response.statusCode == 200) {
+        if (role == 'victim') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => victimScreen()),
+          );
+        } else if (role == 'consultant') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => ConsultantScreen()),
+          );
+        } else if (role == 'donor') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => DonorScreen()),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (c) => const Roles()),
+          );
+        }
+        return;
+      }
+    } catch (e) {
+      // silent fail, continue below
+    }
+
+    Widget target;
+    if (role == 'victim') {
+      target = VictimBasicInfo();
+    } else if (role == 'consultant') {
+      target = ConsultantBasicInfo();
+    } else if (role == 'donor') {
+      target = DonorBasicInfo();
+    } else {
+      target = Roles();
+    }
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => target),
+    );
   }
 
   @override
@@ -679,30 +736,5 @@ class _LoginState extends State<Login> {
       ),
       backgroundColor: Color(0xFFF2EDF6),
     );
-  }
-}
-
-Future<void> fetchAndCacheUserData(User? user) async {
-  if (user == null) return;
-
-  try {
-    final response = await http.post(
-      Uri.parse(
-        "https://authbackend-production-d43e.up.railway.app/api/receive-data/",
-      ),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({"uid": user.uid}),
-    );
-
-    if (response.statusCode == 200) {
-      final responseData = json.decode(response.body);
-      final userData = responseData['data'];
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('Data', json.encode(userData));
-    } else {
-      print("❌ Failed to fetch user data from backend");
-    }
-  } catch (e) {
-    print("❌ Exception during fetch: $e");
   }
 }
